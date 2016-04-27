@@ -26,6 +26,20 @@ This folder is for attention related works.
 	- object proposals techniques emerge as an alternative to the traditional text detectors.
 	- [code][11]
 
+7. [Listen, attend and spell][12]
+	- arxiv 2015
+	- Composed of a listener and a speller
+	- Listener: a pyramidal recurrent network encoder accepts filder bank spectra as inputs
+	- Speller: an attention based recurrent netowrk decoder that emits characters as outputs. 
+
+ 8. [Listen, attend and walk][13]
+	- arxiv 2015, 4 cited
+	- translates natural language instructions to action sequences
+
+9. [Playing atari][14]
+	- NIPS2013, by Google Deepmind, 186 cited
+	- deep learning + reinforcement learning 
+
 [1]:	http://arxiv.org/abs/1603.08575
 [2]:	http://arxiv.org/abs/1603.03101
 [3]:	http://arxiv.org/abs/1602.03609
@@ -37,3 +51,6 @@ This folder is for attention related works.
 [9]:	http://rsarxiv.github.io/2016/04/24/%E8%87%AA%E5%8A%A8%E6%96%87%E6%91%98%EF%BC%88%E4%BA%94%EF%BC%89/
 [10]:	http://arxiv.org/abs/1604.02619
 [11]:	https://github.com/lluisgomez/TextProposals
+[12]:	https://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/44926.pdf
+[13]:	http://arxiv.org/abs/1506.04089
+[14]:	http://arxiv.org/abs/1312.5602

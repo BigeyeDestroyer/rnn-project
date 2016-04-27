@@ -40,6 +40,9 @@ This folder is for attention related works.
 	- NIPS2013, by Google Deepmind, 186 cited
 	- deep learning + reinforcement learning 
 
+10. [multiple object recognition][15]
+	- Attention based RNN trained with reinforcement learning to attend the mose relevant regions of the input image. 
+
 [1]:	http://arxiv.org/abs/1603.08575
 [2]:	http://arxiv.org/abs/1603.03101
 [3]:	http://arxiv.org/abs/1602.03609
@@ -54,3 +57,4 @@ This folder is for attention related works.
 [12]:	https://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/44926.pdf
 [13]:	http://arxiv.org/abs/1506.04089
 [14]:	http://arxiv.org/abs/1312.5602
+[15]:	http://arxiv.org/abs/1412.7755

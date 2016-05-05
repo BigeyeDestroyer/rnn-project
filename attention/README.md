@@ -54,6 +54,7 @@ This folder is for attention related works.
 
 13. [Social LSTM][18]
 	- From Li Fei Fei
+	- We should pay attention to the work of [Alexandre Alahi][19]
 
 [1]:	http://arxiv.org/abs/1603.08575
 [2]:	http://arxiv.org/abs/1603.03101
@@ -73,3 +74,4 @@ This folder is for attention related works.
 [16]:	http://arxiv.org/abs/1502.04623
 [17]:	http://papers.nips.cc/paper/5854-spatial-transformer-networks
 [18]:	http://cvgl.stanford.edu/papers/CVPR16_Social_LSTM.pdf
+[19]:	http://web.stanford.edu/~alahi/pub.htm

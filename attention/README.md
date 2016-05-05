@@ -43,6 +43,7 @@ This folder is for attention related works.
 
 10. [multiple object recognition][15]
 	- Attention based RNN trained with reinforcement learning to attend the mose relevant regions of the input image.
+	- ICLR 2015
 
 11. [DRAW][16]
 	- A recurrent network for image generation 
@@ -50,6 +51,9 @@ This folder is for attention related works.
 
 12. [Spatial transform network][17]
 	- NIPS2015, 49 cited
+
+13. [Social LSTM][18]
+	- From Li Fei Fei
 
 [1]:	http://arxiv.org/abs/1603.08575
 [2]:	http://arxiv.org/abs/1603.03101
@@ -68,3 +72,4 @@ This folder is for attention related works.
 [15]:	http://arxiv.org/abs/1412.7755
 [16]:	http://arxiv.org/abs/1502.04623
 [17]:	http://papers.nips.cc/paper/5854-spatial-transformer-networks
+[18]:	http://cvgl.stanford.edu/papers/CVPR16_Social_LSTM.pdf

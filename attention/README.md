@@ -32,6 +32,7 @@ This folder is for attention related works.
 	- Listener: a pyramidal recurrent network encoder accepts filder bank spectra as inputs
 	- Speller: an attention based recurrent netowrk decoder that emits characters as outputs. 
 
+
  8. [Listen, attend and walk][13]
 	- arxiv 2015, 4 cited
 	- translates natural language instructions to action sequences
@@ -41,7 +42,7 @@ This folder is for attention related works.
 	- deep learning + reinforcement learning 
 
 10. [multiple object recognition][15]
-	- Attention based RNN trained with reinforcement learning to attend the mose relevant regions of the input image. 
+	- Attention based RNN trained with reinforcement learning to attend the mose relevant regions of the input image.
 
 [1]:	http://arxiv.org/abs/1603.08575
 [2]:	http://arxiv.org/abs/1603.03101

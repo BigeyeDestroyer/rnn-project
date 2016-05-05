@@ -48,6 +48,9 @@ This folder is for attention related works.
 	- A recurrent network for image generation 
 	- ICML2015, 100 cited, from Google Deepmind
 
+12. [Spatial transform network][17]
+	- NIPS2015, 49 cited
+
 [1]:	http://arxiv.org/abs/1603.08575
 [2]:	http://arxiv.org/abs/1603.03101
 [3]:	http://arxiv.org/abs/1602.03609
@@ -64,3 +67,4 @@ This folder is for attention related works.
 [14]:	http://arxiv.org/abs/1312.5602
 [15]:	http://arxiv.org/abs/1412.7755
 [16]:	http://arxiv.org/abs/1502.04623
+[17]:	http://papers.nips.cc/paper/5854-spatial-transformer-networks

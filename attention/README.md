@@ -44,6 +44,10 @@ This folder is for attention related works.
 10. [multiple object recognition][15]
 	- Attention based RNN trained with reinforcement learning to attend the mose relevant regions of the input image.
 
+11. [DRAW][16]
+	- A recurrent network for image generation 
+	- ICML2015, 100 cited, from Google Deepmind
+
 [1]:	http://arxiv.org/abs/1603.08575
 [2]:	http://arxiv.org/abs/1603.03101
 [3]:	http://arxiv.org/abs/1602.03609
@@ -59,3 +63,4 @@ This folder is for attention related works.
 [13]:	http://arxiv.org/abs/1506.04089
 [14]:	http://arxiv.org/abs/1312.5602
 [15]:	http://arxiv.org/abs/1412.7755
+[16]:	http://arxiv.org/abs/1502.04623

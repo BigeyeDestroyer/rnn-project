@@ -57,7 +57,7 @@ This folder is for attention related works.
 	- We should pay attention to the work of [Alexandre Alahi][19]
 
 14. [Show attend and tell][20]
-	- Bengio, NIPS2015, 189 cited
+	- Bengio, ICML2015, 189 cited
 
 [1]:	http://arxiv.org/abs/1603.08575
 [2]:	http://arxiv.org/abs/1603.03101

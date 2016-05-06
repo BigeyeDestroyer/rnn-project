@@ -56,6 +56,9 @@ This folder is for attention related works.
 	- From Li Fei Fei
 	- We should pay attention to the work of [Alexandre Alahi][19]
 
+14. [Show attend and tell][20]
+	- Bengio, NIPS2015, 189 cited
+
 [1]:	http://arxiv.org/abs/1603.08575
 [2]:	http://arxiv.org/abs/1603.03101
 [3]:	http://arxiv.org/abs/1602.03609
@@ -75,3 +78,4 @@ This folder is for attention related works.
 [17]:	http://papers.nips.cc/paper/5854-spatial-transformer-networks
 [18]:	http://cvgl.stanford.edu/papers/CVPR16_Social_LSTM.pdf
 [19]:	http://web.stanford.edu/~alahi/pub.htm
+[20]:	http://arxiv.org/abs/1502.03044

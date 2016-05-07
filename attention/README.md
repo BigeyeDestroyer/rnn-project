@@ -42,7 +42,7 @@ This folder is for attention related works.
 	- deep learning + reinforcement learning 
 
 10. [multiple object recognition][15]
-	- Attention based RNN trained with reinforcement learning to attend the mose relevant regions of the input image.
+	- Attention based RNN trained with reinforcement learning to attend the most relevant regions of the input image.
 	- ICLR 2015, 51 cited
 
 11. [DRAW][16]

@@ -94,7 +94,7 @@ void chooseAnAction()
 
 	if(R[currentState][possibleAction] >= 0)
 	{
-		// set newes Q-value 
+		// set newest Q-value 
 		Q[currentState][possibleAction] = reward(possibleAction);
 		currentState = possibleAction;
 	}

@@ -20,4 +20,5 @@ plot(rwheel(1,:), rwheel(2,:));
 
 axis([-1.3 0.6 -0.4 0.4]);
 axis equal;
+hold off;
 

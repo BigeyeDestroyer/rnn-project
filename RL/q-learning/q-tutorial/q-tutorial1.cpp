@@ -9,7 +9,9 @@ const double gamma = 0.8; // the discount factor
 const int iterations = 10;
 int initialStates[qSize] = {1, 3, 5, 2, 4, 0};
 
-int R[qSize][qSize] = {{-1, -1, -1, -1, 0, -1}, 
+// rewards of every (state, action) pair
+// and out destination is door 5. 
+int R[qSize][qSize] = {{-1, -1, -1, -1, 0, -1},  
                        {-1, -1, -1, 0, -1, 100}, 
                        {-1, -1, -1, 0, -1, -1}, 
                        {-1, 0, 0, -1, 0, -1}, 

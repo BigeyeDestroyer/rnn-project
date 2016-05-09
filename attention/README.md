@@ -62,6 +62,9 @@ This folder is for attention related works.
 15. [recurrent models of visual attention][21]
 	- Alex Graves, NIPS2014, 96 cited
 
+16. [gradient-following algorithms for RL][22]
+	- 1992, 1112 cited
+
 [1]:	http://arxiv.org/abs/1603.08575
 [2]:	http://arxiv.org/abs/1603.03101
 [3]:	http://arxiv.org/abs/1602.03609
@@ -83,3 +86,4 @@ This folder is for attention related works.
 [19]:	http://web.stanford.edu/~alahi/pub.htm
 [20]:	http://arxiv.org/abs/1502.03044
 [21]:	http://arxiv.org/abs/1406.6247
+[22]:	http://incompleteideas.net/sutton/williams-92.pdf

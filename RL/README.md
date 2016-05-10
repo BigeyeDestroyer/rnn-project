@@ -27,6 +27,7 @@ This folder is for resources related to reinforcemnet learning.
 	- [recurrent models of visual attention][9]
 		- NIPS2014, 96 cited
 		- code: [Tensorflow][10]
+		- realized in the folder  **visual-attention**
 
 	- [multiple object recognition][11]: ICLR2015, 51 cited 
 

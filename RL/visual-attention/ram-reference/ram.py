@@ -66,6 +66,9 @@ def glimpseSensor(img, normLoc):
         offset = max_radius
     
         # pad image with zeros
+        # pad_to_bounding_box(offset_height, offset_width, target_height, target_width)
+        # pad offset rows of zero on the top, offset columns on the left
+        # then pad the bottom and right until width and height reach target
         one_img = tf.image.pad_to_bounding_box(one_img, offset, offset, \
             max_radius * 2 + mnist_size, max_radius * 2 + mnist_size)
         

@@ -9,8 +9,7 @@ import theano
 
 class LSTMLayer(object):
     def __init__(self, rng, layer_id, shape, X, mask,
-                 use_noise=1, p=0.5, persistent_X=None,
-                 persistent_h=None, persistent_c=None):
+                 use_noise=1, p=0.5):
         """
         Basic LSTM initialization function with dropout
 
@@ -38,17 +37,6 @@ class LSTMLayer(object):
         :type p: float
         :param p: dropout ratio
 
-        :type persistent_X: a 3D or 2D variable
-        :param persistent_X: computed by previous layer's
-                             persistent hidden state
-
-        :type persistent_h:  shared variable, with size (n_samples, hid_size)
-        :param persistent_h: used for the case when we want to
-                             inheritate the previous hidden state
-
-        :type persistent_c:  shared variable, with size (n_samples, hid_size)
-        :param persistent_c: used for the case when we want to
-                             inheritate the previous hidden state
         """
         prefix = 'LSTM' + layer_id
         self.in_size, self.hid_size = shape
@@ -71,10 +59,6 @@ class LSTMLayer(object):
 
         self.X = X
         self.mask = mask
-        self.persistent_X = persistent_X
-        self.persistent_h = persistent_h
-        self.persistent_c = persistent_c
-        self.persistent_update = []
 
         nsteps = X.shape[0]
         if X.ndim == 3:
@@ -132,11 +116,6 @@ class LSTMLayer(object):
                                               T.alloc(floatX(0.),
                                                       n_samples,
                                                       self.hid_size)])
-        # for persistent update
-        if persistent_c is not None and persistent_h is not None:
-            [c_persistent, h_persistent], _ = theano.scan(fn=_step,
-                                                          sequences=[self.persistent_X, self.mask],
-                                                          outputs_info=[persistent_c, persistent_h])
 
         # h here is of size (t, n_samples, hid_size)
         if p > 0:
@@ -144,31 +123,10 @@ class LSTMLayer(object):
             drop_mask = trng.binomial(size=h.shape, n=1,
                                       p=(1 - p), dtype=theano.config.floatX)
             self.activation = T.switch(T.eq(use_noise, 1), h * drop_mask, h * (1 - p))
-            # for persistent update
-            if persistent_c is not None and persistent_h is not None:
-                self.activation_persistent = T.switch(T.eq(use_noise, 1),
-                                                      h_persistent * drop_mask,
-                                                      h_persistent * (1 - p))
         else:
-            # for persistent update
-            if persistent_c is not None and persistent_h is not None:
-                self.activation_persistent = h_persistent
             self.activation = h
 
         self.params = [self.W, self.U, self.b]
-
-        """ This part is for asychronize update
-        """
-        # inputs related parameters
-        self.Wx = [self.W]
-        # recurrent related parameters
-        self.Wh = [self.U, self.b]
-
-        """ This part is for persistent
-        """
-        if persistent_c is not None and persistent_h is not None:
-            self.persistent_update.append([persistent_h, h_persistent[-1]])
-            self.persistent_update.append([persistent_c, c_persistent[-1]])
 
 
 class BdLSTMLayer(object):

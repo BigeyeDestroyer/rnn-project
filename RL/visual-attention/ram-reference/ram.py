@@ -73,7 +73,7 @@ def glimpseSensor(img, normLoc):
             max_radius * 2 + mnist_size, max_radius * 2 + mnist_size)
         
         for i in xrange(depth):
-            r = int(minRadius * (2 ** (i - 1)))
+            r = int(minRadius * (2 ** i))
 
             d_raw = 2 * r
             d = tf.constant(d_raw, shape=[1])

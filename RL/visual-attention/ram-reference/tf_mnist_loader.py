@@ -73,6 +73,8 @@ def extract_labels(filename, one_hot=False):
     if one_hot:
       return dense_to_one_hot(labels)
     return labels
+
+
 class DataSet(object):
   def __init__(self, images, labels, fake_data=False, one_hot=False):
     """Construct a DataSet. one_hot arg is used only if fake_data is true."""
@@ -108,6 +110,7 @@ class DataSet(object):
   @property
   def epochs_completed(self):
     return self._epochs_completed
+
   def next_batch(self, batch_size, fake_data=False):
     """Return the next `batch_size` examples from this data set."""
     if fake_data:
@@ -123,17 +126,21 @@ class DataSet(object):
     if self._index_in_epoch > self._num_examples:
       # Finished epoch
       self._epochs_completed += 1
+
       # Shuffle the data
       perm = numpy.arange(self._num_examples)
       numpy.random.shuffle(perm)
       self._images = self._images[perm]
       self._labels = self._labels[perm]
+      
       # Start next epoch
       start = 0
       self._index_in_epoch = batch_size
       assert batch_size <= self._num_examples
     end = self._index_in_epoch
     return self._images[start:end], self._labels[start:end]
+
+
 def read_data_sets(train_dir, fake_data=False, one_hot=False):
   class DataSets(object):
     pass

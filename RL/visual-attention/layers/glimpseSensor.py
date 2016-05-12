@@ -24,7 +24,7 @@ import theano.tensor.nnet.abstract_conv as upsample
 
 
 class glimpseSensor(object):
-    def __init__(self, layer_id, img, normLoc, mnist_size=28, channels=1, depth=3, minRadius=8, sensorBandwidth=8):
+    def __init__(self, img, normLoc, batch_size, mnist_size=28, channels=1, depth=3, minRadius=4, sensorBandwidth=8):
         """ Recurrent Attention Model from
         "Recurrent Models of Visual Attention" (Mnih + 2014)
 
@@ -38,6 +38,9 @@ class glimpseSensor(object):
 
         :type normLoc: variable with size (batch_size x 2)
         :param normLoc: model inputs
+
+        :type batch_size: int
+        :param batch_size: batch size
 
         :type mnist_size: int
         :param mnist_size: length of the mnist square (usually 28)
@@ -54,7 +57,6 @@ class glimpseSensor(object):
         :type sensorBandwidth: int
         :param sensorBandwidth: length of the glimpse square
         """
-        prefix = 'glimpseSensor' + layer_id
 
         self.mnist_size = mnist_size
         self.channels = channels
@@ -66,7 +68,6 @@ class glimpseSensor(object):
         loc = ((normLoc + 1) / 2) * self.mnist_size
         loc = T.cast(loc, 'int32')
 
-        batch_size = img.shape[0]
         img = T.reshape(img, (batch_size, mnist_size, mnist_size, channels))
         self.img = img  # with size (batch, h, w, 1)
 
@@ -82,11 +83,12 @@ class glimpseSensor(object):
             # pad image with zeros
             # original size : (mnist_size, mnist_size, 1)
             # padded size   : (mnist_size + 2 * maxRadius, mnist_size + 2 * maxRadius, 1)
-            one_img = T.zeros([mnist_size + 2 * maxRadius,
-                               mnist_size + 2 * maxRadius, 1],
-                              dtype=theano.config.floatX)
-            one_img[maxRadius: (mnist_size + maxRadius),
-            maxRadius: (mnist_size + maxRadius), :] = self.img[k, :, :, :]
+            img_up = T.concatenate((T.zeros((maxRadius, mnist_size, 1)), self.img[k, :, :, :]), axis=0)
+            img_down = T.concatenate((img_up, T.zeros((maxRadius, mnist_size, 1))), axis=0)
+            img_left = T.concatenate((T.zeros((mnist_size + 2 * maxRadius, maxRadius, 1)), img_down), axis=1)
+            one_img = T.concatenate((img_left, T.zeros((mnist_size + 2 * maxRadius, maxRadius, 1))), axis=1)
+
+            one_img = T.cast(one_img, dtype=theano.config.floatX)
 
             for i in xrange(depth):
                 # r = minR, 2* minR, ..., (2^(depth - 1)) * minR

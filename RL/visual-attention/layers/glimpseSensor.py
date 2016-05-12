@@ -39,6 +39,8 @@ class glimpseSensor(object):
 
         :type sensorBandwidth: int
         :param sensorBandwidth: length of the glimpse square
+
+        :return self.zooms: (batch, depth, channel, height, width)
         """
         self.batch_size = batch_size
         self.mnist_size = mnist_size
@@ -51,8 +53,8 @@ class glimpseSensor(object):
         loc = ((normLoc + 1) / 2) * mnist_size
         loc = T.cast(loc, 'int32')
 
-        # img with size (batch, height, width, channels)
-        img = T.reshape(img_batch, (batch_size, mnist_size, mnist_size, channels))
+        # img with size (batch, channels, height, width)
+        img = T.reshape(img_batch, (batch_size, channels, mnist_size, mnist_size))
         self.img = img  # with size (batch, h, w, 1)
 
         zooms = []  # zooms of all the images in batch
@@ -61,16 +63,16 @@ class glimpseSensor(object):
         offset = maxRadius
 
         # zero-padding the batch to (batch, h + 2R, w + 2R, channels)
-        img = T.concatenate((T.zeros((batch_size, maxRadius, mnist_size, channels)), img), axis=1)
-        img = T.concatenate((img, T.zeros((batch_size, maxRadius, mnist_size, 1))), axis=1)
-        img = T.concatenate((T.zeros((batch_size, mnist_size + 2 * maxRadius, maxRadius, 1)), img), axis=2)
-        img = T.concatenate((img, T.zeros((batch_size, mnist_size + 2 * maxRadius, maxRadius, 1))), axis=2)
+        img = T.concatenate((T.zeros((batch_size, channels, maxRadius, mnist_size)), img), axis=2)
+        img = T.concatenate((img, T.zeros((batch_size, channels, maxRadius, mnist_size))), axis=2)
+        img = T.concatenate((T.zeros((batch_size, channels, mnist_size + 2 * maxRadius, maxRadius)), img), axis=3)
+        img = T.concatenate((img, T.zeros((batch_size, channels, mnist_size + 2 * maxRadius, maxRadius))), axis=3)
         img = T.cast(img, dtype=theano.config.floatX)
 
         for k in xrange(batch_size):
             imgZooms = []  # zoom for a single image
 
-            # one_img with size (2R + size, 2R + size, 1)
+            # one_img with size (channels, 2R + size, 2R + size), channels=1 here
             one_img = img[k, :, :, :]
 
             for i in xrange(depth):
@@ -82,21 +84,30 @@ class glimpseSensor(object):
                 loc_k = loc[k, :]  # location of the k-th glimpse, (2, )
                 adjusted_loc = T.cast(offset + loc_k - r, 'int32')  # upper-left corner of the patch
 
-                one_img = T.reshape(one_img, (one_img.shape[0], one_img.shape[1]))
+                # one_img = T.reshape(one_img, (one_img.shape[0], one_img.shape[1]))
 
                 # Get a zoom patch with size (d_raw, d_raw) from one_image
-                zoom = one_img[adjusted_loc[0]: (adjusted_loc[0] + d_raw),
+                # zoom = one_img[adjusted_loc[0]: (adjusted_loc[0] + d_raw),
+                #        adjusted_loc[1]: (adjusted_loc[1] + d_raw)]
+                zoom = one_img[:, adjusted_loc[0]: (adjusted_loc[0] + d_raw),
                        adjusted_loc[1]: (adjusted_loc[1] + d_raw)]
 
                 if r < sensorBandwidth:  # bilinear-interpolation
                     #  here, zoom is a 2D patch with size (2r, 2r)
-                    zoom_reshape = T.reshape(zoom, (1, 1, zoom.shape[0], zoom.shape[1]))
+                    # zoom = T.swapaxes(zoom, 1, 2)
+                    # zoom = T.swapaxes(zoom, 0, 1)  # here, zoom with size (channel, height, width)
+                    zoom_reshape = T.reshape(zoom, (1, zoom.shape[0], zoom.shape[1], zoom.shape[2]))
                     zoom_bandwidth = upsample.bilinear_upsampling(zoom_reshape,
                                                                   ratio=(sensorBandwidth / r),
-                                                                  batch_size=1, num_input_channels=1)
-                    zoom_bandwidth = T.reshape(zoom_bandwidth, (zoom_bandwidth.shape[2],
+                                                                  batch_size=1, num_input_channels=channels)
+                    # bandwith is with size (channel, height, width)
+                    zoom_bandwidth = T.reshape(zoom_bandwidth, (zoom_bandwidth.shape[1],
+                                                                zoom_bandwidth.shape[2],
                                                                 zoom_bandwidth.shape[3]))
                 elif r > sensorBandwidth:
+                    # pooling operation will be down over the last 2 dimension
+                    # zoom = T.swapaxes(zoom, 1, 2)
+                    # zoom = T.swapaxes(zoom, 0, 1)  # here, zoom with size (channel, height, width)
                     zoom_bandwidth = pool.pool_2d(input=zoom,
                                                   ds=(r / sensorBandwidth,
                                                       r / sensorBandwidth),
@@ -109,6 +120,7 @@ class glimpseSensor(object):
 
             zooms.append(T.stack(imgZooms))
 
+        # returned self.zooms is with size (batch, depth, channel, height, width)
         self.zooms = T.stack(zooms)
 
 

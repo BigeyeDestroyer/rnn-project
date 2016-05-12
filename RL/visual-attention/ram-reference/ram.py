@@ -27,9 +27,9 @@ channels = 1 # grayscale
 totalSensorBandwidth = depth * sensorBandwidth * sensorBandwidth * channels
 batch_size = 10
 
-hg_size = 128
-hl_size = 128
-g_size = 256
+hg_size = 128  # hg = Rect(Linear(rho(x, l))
+hl_size = 128  # hl = Rect(Linear(l))
+g_size = 256   # g = Rect(Linear(hg) + Linear(hl))
 cell_size = 256
 cell_out_size = cell_size
 

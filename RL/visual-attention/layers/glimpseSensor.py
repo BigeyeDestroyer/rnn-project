@@ -1,30 +1,13 @@
-"""
-Below are the params needed for glimpseSensor:
-
-minRadius = 4
-sensorBandwidth = 8  # fixed resolution of sensor
-sensorArea = sensorBandwidth ** 2
-depth = 3  # channels of zoom
-channels = 1  # grayscale image
-totalSensorBandwidth = depth * sensorBandwidth * \
-                       sensorBandwidth * channels
-
-mnist_size = 28
-
-"""
 import theano.tensor as T
-from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 import sys
 sys.path.append('..')
-from common.utils import *
-import numpy
 import theano
 import theano.tensor.signal.pool as pool
 import theano.tensor.nnet.abstract_conv as upsample
 
 
 class glimpseSensor(object):
-    def __init__(self, img, normLoc, batch_size, mnist_size=28, channels=1, depth=3, minRadius=4, sensorBandwidth=8):
+    def __init__(self, img_batch, normLoc, batch_size=16, mnist_size=28, channels=1, depth=3, minRadius=4, sensorBandwidth=8):
         """ Recurrent Attention Model from
         "Recurrent Models of Visual Attention" (Mnih + 2014)
 
@@ -33,8 +16,8 @@ class glimpseSensor(object):
         :type layer_id: str
         :param layer_id: id of this layer
 
-        :type img: a 2D variable, each row an mnist image
-        :param img: model inputs
+        :type img_batch: a 2D variable, each row an mnist image
+        :param img_batch: model inputs
 
         :type normLoc: variable with size (batch_size x 2)
         :param normLoc: model inputs
@@ -57,7 +40,7 @@ class glimpseSensor(object):
         :type sensorBandwidth: int
         :param sensorBandwidth: length of the glimpse square
         """
-
+        self.batch_size = batch_size
         self.mnist_size = mnist_size
         self.channels = channels
         self.depth = depth
@@ -65,47 +48,48 @@ class glimpseSensor(object):
         self.sensorBandwidth = sensorBandwidth
 
         # from [-1.0, 1.0] -> [0, 28]
-        loc = ((normLoc + 1) / 2) * self.mnist_size
+        loc = ((normLoc + 1) / 2) * mnist_size
         loc = T.cast(loc, 'int32')
 
-        img = T.reshape(img, (batch_size, mnist_size, mnist_size, channels))
+        # img with size (batch, height, width, channels)
+        img = T.reshape(img_batch, (batch_size, mnist_size, mnist_size, channels))
         self.img = img  # with size (batch, h, w, 1)
 
+        zooms = []  # zooms of all the images in batch
 
-        zooms = []
-        # process each image individually
+        maxRadius = minRadius * (2 ** (depth - 1))  # radius of the largest zoom
+        offset = maxRadius
+
+        # zero-padding the batch to (batch, h + 2R, w + 2R, channels)
+        img = T.concatenate((T.zeros((batch_size, maxRadius, mnist_size, channels)), img), axis=1)
+        img = T.concatenate((img, T.zeros((batch_size, maxRadius, mnist_size, 1))), axis=1)
+        img = T.concatenate((T.zeros((batch_size, mnist_size + 2 * maxRadius, maxRadius, 1)), img), axis=2)
+        img = T.concatenate((img, T.zeros((batch_size, mnist_size + 2 * maxRadius, maxRadius, 1))), axis=2)
+        img = T.cast(img, dtype=theano.config.floatX)
+
         for k in xrange(batch_size):
-            imgZooms = []
+            imgZooms = []  # zoom for a single image
 
-            maxRadius = minRadius * (2 ** (depth - 1))  # radius of the largest zoom
-            offset = maxRadius
-
-            # pad image with zeros
-            # original size : (mnist_size, mnist_size, 1)
-            # padded size   : (mnist_size + 2 * maxRadius, mnist_size + 2 * maxRadius, 1)
-            img_up = T.concatenate((T.zeros((maxRadius, mnist_size, 1)), self.img[k, :, :, :]), axis=0)
-            img_down = T.concatenate((img_up, T.zeros((maxRadius, mnist_size, 1))), axis=0)
-            img_left = T.concatenate((T.zeros((mnist_size + 2 * maxRadius, maxRadius, 1)), img_down), axis=1)
-            one_img = T.concatenate((img_left, T.zeros((mnist_size + 2 * maxRadius, maxRadius, 1))), axis=1)
-
-            one_img = T.cast(one_img, dtype=theano.config.floatX)
+            # one_img with size (2R + size, 2R + size, 1)
+            one_img = img[k, :, :, :]
 
             for i in xrange(depth):
-                # r = minR, 2* minR, ..., (2^(depth - 1)) * minR
-                r = int(minRadius * (2 ** i))
+                # r = minR, 2 * minR, ..., (2^(depth - 1)) * minR
+                r = minRadius * (2 ** i)
 
                 d_raw = 2 * r  # patch size to be cropped
-                d = [d_raw, d_raw]  # the patch size to be cropped
 
                 loc_k = loc[k, :]  # location of the k-th glimpse, (2, )
                 adjusted_loc = T.cast(offset + loc_k - r, 'int32')  # upper-left corner of the patch
 
-                # reshape makes a tensor with size (n, n, 1) to (n, n)
-                one_img_2D = T.reshape(one_img, (one_img.shape[0], one_img.shape[1]))
-                zoom = one_img_2D[adjusted_loc[0]: (adjusted_loc[0] + d),
-                       adjusted_loc[1]: (adjusted_loc[1] + d)]
+                one_img = T.reshape(one_img, (one_img.shape[0], one_img.shape[1]))
+
+                # Get a zoom patch with size (d_raw, d_raw) from one_image
+                zoom = one_img[adjusted_loc[0]: (adjusted_loc[0] + d_raw),
+                       adjusted_loc[1]: (adjusted_loc[1] + d_raw)]
+
                 if r < sensorBandwidth:  # bilinear-interpolation
-                    # here, zoom is a 2D patch
+                    #  here, zoom is a 2D patch with size (2r, 2r)
                     zoom_reshape = T.reshape(zoom, (1, 1, zoom.shape[0], zoom.shape[1]))
                     zoom_bandwidth = upsample.bilinear_upsampling(zoom_reshape,
                                                                   ratio=(sensorBandwidth / r),
@@ -118,12 +102,14 @@ class glimpseSensor(object):
                                                       r / sensorBandwidth),
                                                   mode='average_inc_pad',
                                                   ignore_border=True)
-                imgZooms.append(zoom_bandwidth)  # zoom for a single image
+                else:
+                    zoom_bandwidth = zoom
 
-            zooms.append(T.stack(imgZooms))  # stack -> (depth, width, height)
+                imgZooms.append(zoom_bandwidth)
 
-        self.zooms = T.stack(zooms)  # stack -> (batch, depth, width, height)
+            zooms.append(T.stack(imgZooms))
 
+        self.zooms = T.stack(zooms)
 
 
 

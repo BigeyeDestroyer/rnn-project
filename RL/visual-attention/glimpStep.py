@@ -38,19 +38,27 @@ img = T.reshape(img_batch, (batch_size, mnist_size, mnist_size, channels))
 
 zooms = []  # zooms of all the images in batch
 
+maxRadius = minRadius * (2 ** (depth - 1))  # radius of the largest zoom
+offset = maxRadius
+
+# zero-padding the batch to (batch, h + 2R, w + 2R, channels)
+img = T.concatenate((T.zeros((batch_size, maxRadius, mnist_size, channels)), img), axis=1)
+img = T.concatenate((img, T.zeros((batch_size, maxRadius, mnist_size, 1))), axis=1)
+img = T.concatenate((T.zeros((batch_size, mnist_size + 2 * maxRadius, maxRadius, 1)), img), axis=2)
+img = T.concatenate((img, T.zeros((batch_size, mnist_size + 2 * maxRadius, maxRadius, 1))), axis=2)
+img = T.cast(img, dtype=theano.config.floatX)
+
 for k in xrange(batch_size):
     imgZooms = []  # zoom for a single image
 
-    maxRadius = minRadius * (2 ** (depth - 1))  # radius of the largest zoom
-    offset = maxRadius
-
-    img_up = T.concatenate((T.zeros((maxRadius, mnist_size, 1)), img[k, :, :, :]), axis=0)
-    img_down = T.concatenate((img_up, T.zeros((maxRadius, mnist_size, 1))), axis=0)
-    img_left = T.concatenate((T.zeros((mnist_size + 2 * maxRadius, maxRadius, 1)), img_down), axis=1)
-    one_img = T.concatenate((img_left, T.zeros((mnist_size + 2 * maxRadius, maxRadius, 1))), axis=1)
+    #img_up = T.concatenate((T.zeros((maxRadius, mnist_size, 1)), img[k, :, :, :]), axis=0)
+    #img_down = T.concatenate((img_up, T.zeros((maxRadius, mnist_size, 1))), axis=0)
+    #img_left = T.concatenate((T.zeros((mnist_size + 2 * maxRadius, maxRadius, 1)), img_down), axis=1)
+    #one_img = T.concatenate((img_left, T.zeros((mnist_size + 2 * maxRadius, maxRadius, 1))), axis=1)
 
     # one_img with size (2R + size, 2R + size, 1)
-    one_img = T.cast(one_img, dtype=theano.config.floatX)
+    # one_img = T.cast(one_img, dtype=theano.config.floatX)
+    one_img = img[k, :, :, :]
 
     for i in xrange(depth):
         # r = minR, 2 * minR, ..., (2^(depth - 1)) * minR

@@ -51,13 +51,7 @@ img = T.cast(img, dtype=theano.config.floatX)
 for k in xrange(batch_size):
     imgZooms = []  # zoom for a single image
 
-    #img_up = T.concatenate((T.zeros((maxRadius, mnist_size, 1)), img[k, :, :, :]), axis=0)
-    #img_down = T.concatenate((img_up, T.zeros((maxRadius, mnist_size, 1))), axis=0)
-    #img_left = T.concatenate((T.zeros((mnist_size + 2 * maxRadius, maxRadius, 1)), img_down), axis=1)
-    #one_img = T.concatenate((img_left, T.zeros((mnist_size + 2 * maxRadius, maxRadius, 1))), axis=1)
-
     # one_img with size (2R + size, 2R + size, 1)
-    # one_img = T.cast(one_img, dtype=theano.config.floatX)
     one_img = img[k, :, :, :]
 
     for i in xrange(depth):

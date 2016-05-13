@@ -107,6 +107,13 @@ class RAM(object):
         self.W_ha_out = theano.shared(value=W_values, name='ha_out#W', borrow=True)
         self.b_ha_out = theano.shared(value=b_values, name='ha_out#b', borrow=True)
 
+        self.params = [self.W_hl, self.b_hl,
+                       self.W_hg, self.b_hg,
+                       self.W_g, self.b_g,
+                       self.W_lstm, self.U_lstm, self.b_lstm,
+                       self.W_hl_out, self.b_hl_out,
+                       self.W_ha_out, self.b_ha_out]
+
         # Sensor of RAM
         def _glimpseSensor(img_batch, normLoc):
             """ This function calculate the glimpse sensors

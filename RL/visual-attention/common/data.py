@@ -392,7 +392,8 @@ def prepare_text8(seqs):
 def get_minibatches_idx(n, minibatch_size, shuffle=False):
     """
     This function shuffles the samples at the
-    beginning of each iteration
+    beginning of each iteration, this is the
+    modified version
 
     Parameters
     ----------
@@ -418,9 +419,12 @@ def get_minibatches_idx(n, minibatch_size, shuffle=False):
                                     minibatch_start + minibatch_size])
         minibatch_start += minibatch_size
 
+    # The modified part, we don't make use of the residual
+    """
     if minibatch_start != n:
         # Make a minibatch out of what is left
         minibatches.append(idx_list[minibatch_start:])
+    """
 
     # zipped (index, list) pair
     return zip(range(len(minibatches)), minibatches)

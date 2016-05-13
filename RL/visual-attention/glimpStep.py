@@ -1,6 +1,3 @@
-import theano.tensor as T
-import numpy
-import theano
 import sys
 sys.path.append('..')
 from common.utils import *
@@ -9,55 +6,41 @@ from layers.ram import RAM
 
 # images and labels are the inputs
 dataset = mnist_loader.read_data_sets("data")
-images, labels = dataset.train.next_batch(batch_size=16)
-locs = numpy.random.uniform(low=-1, high=1, size=(images.shape[0], 2))
-print images.shape
-print labels.shape
 
 # images and locs as inputs
+lr = 0.01
+print('Building model ...')
+model = RAM()
 
+print('Loading data ...')
+images, labels = dataset.train.next_batch(batch_size=128)
+locs = numpy.random.uniform(low=-1, high=1, size=(images.shape[0], 2))
+locs = locs.astype(numpy.float32)
 
-# img : (batch_size, 784)
-# normLoc : (batch_size, 2)
-img_batch = T.matrix('img')
-normLoc = T.matrix('loc')
-y = T.ivector('label')
+print('Predicting ...')
+cost = model.cost(images, locs, labels)
+error = model.error(images, locs, labels)
+print('Cost: %f, Error: %f' % (cost, error))
 
-
-model = RAM(img_batch=img_batch, normLoc=normLoc, y=y)
-
-fn_cost = theano.function(inputs=[img_batch, normLoc, y],
-                          outputs=[model.cost])
-
-cost = fn_cost(images, locs, labels)[0]
-print type(cost)
-print cost
-
-
-
-
-
+pred_prob = model.pred_prob(images, locs)
+pred = model.pred(images, locs)
+print pred_prob
+print pred
+for i in range(100):
+    images, labels = dataset.train.next_batch(batch_size=16)
+    locs = numpy.random.uniform(low=-1, high=1, size=(images.shape[0], 2))
+    locs = locs.astype(numpy.float32)
+    cost_train = model.train(images, locs, labels, lr)
+    print('Iter %d, training cost %f ...' % (i, cost_train))
 
 """
-fn_sample = theano.function(inputs=[img_batch, normLoc],
-                            outputs=[l, l_sampled, c, h])
+cost = model.cost(images, locs, labels)
+error = model.error(images, locs, labels)
+print('cost: %f, error: %f' % (cost, error))
+# [cost, error] = model.cost_and_error(images, locs, labels)
+# print('%d-th iter, cost: %f' % (1, cost))
 
-l_mean, l_s, c_out, h_out = fn_sample(images, locs)
-
-print type(l_mean)
-print l_mean.shape
-print l_mean[0, 0, :]
-
-print type(l_s)
-print l_s.shape
-print l_s[0, 0, :]
-
-print type(c_out)
-print c_out.shape
-
-print type(h_out)
-print h_out.shape """
-
+"""
 
 
 

@@ -1,29 +1,30 @@
-import theano.tensor as T
 import sys
 sys.path.append('..')
-from common.utils import *
+from optimizers.optimizers import *
 import theano.tensor.signal.pool as pool
 import theano.tensor.nnet.abstract_conv as upsample
 from theano.tensor.shared_randomstreams import RandomStreams
 import math
 import numpy
+import h5py
 
 
 class RAM(object):
-    def __init__(self, img_batch, normLoc, y, batch_size=16, mnist_size=28,
+    def __init__(self, batch_size=128, mnist_size=28,
                  channels=1, depth=3, minRadius=4, sensorBandwidth=8,
                  hg_size=128, hl_size=128, g_size=256,
                  cell_size=256, cell_out_size=256, n_classes=10,
-                 loc_sd=0.01, glimpses=6, numpy_rng=numpy.random.RandomState(1234)):
+                 loc_sd=0.01, glimpses=6, numpy_rng=numpy.random.RandomState(1234),
+                 optimizer='adam'):
         """
 
         :param img_batch: always the tensor variable like T.matrix('img')
         :param normLoc: always the tensor variable like T.matrix('loc')
         :param y: always the tensor variable like T.ivector('label')
         """
-        self.img_batch = img_batch
-        self.normLoc = normLoc
-        self.y = y
+        self.img_batch = T.matrix('img_batch')
+        self.normLoc = T.matrix('normLoc')
+        self.y = T.ivector('label')
 
         self.batch_size = batch_size
         self.mnist_size = mnist_size
@@ -42,6 +43,7 @@ class RAM(object):
 
         self.loc_sd = loc_sd
         self.glimpses = glimpses
+        self.optimizer = optimizer
         self.theano_rng = RandomStreams(numpy_rng.randint(2 ** 30))
         self.totalSensorBandwidth = depth * channels * ((2 * sensorBandwidth) ** 2)
 
@@ -282,6 +284,7 @@ class RAM(object):
         outputs = T.reshape(h[-1], (batch_size, cell_out_size))
         self.p_y_given_x = T.nnet.softmax(T.dot(outputs, self.W_ha_out) + self.b_ha_out)
         self.y_pred = T.argmax(self.p_y_given_x, axis=1)
+        self.y_pred_prob = T.max(self.p_y_given_x, axis=1)
 
         R = T.cast(T.eq(self.y_pred, self.y), theano.config.floatX)  # with size (batch, )
         self.reward = T.mean(R)  # average reward of the batch
@@ -290,9 +293,65 @@ class RAM(object):
         p_loc = T.reshape(p_loc, (self.batch_size, 2 * self.glimpses))
         R = T.reshape(R, (self.batch_size, 1))  # reshape for furthur calculation
 
-        J = T.concatenate((T.reshape(T.log(self.p_y_given_x)[T.arange(self.y.shape[0]), self.y], (self.y.shape[0], 1)),
-                           T.reshape(T.mean(T.log(p_loc) * R, axis=1), (self.batch_size, 1))), axis=1)
-        self.cost = -T.mean(T.mean(J, axis=1))
+        self.J = T.concatenate((T.reshape(T.log(self.p_y_given_x)[T.arange(self.y.shape[0]), self.y], (self.y.shape[0], 1)),
+                                T.reshape(T.mean(T.log(p_loc) * R, axis=1), (self.batch_size, 1))), axis=1)
+        # define this function at the end in case that
+        # some variables haven't been calculated
+        self.train_test_funcs()
+
+    def train_test_funcs(self):
+        cost = -T.mean(T.mean(self.J, axis=1))
+        error = T.mean(T.neq(self.y_pred, self.y))
+
+
+        gparams = []
+        for param in self.params:
+            gparam = T.clip(T.grad(cost, param), -10, 10)
+            gparams.append(gparam)
+
+        lr = T.scalar('lr')
+        optimizer = eval(self.optimizer)
+        updates = optimizer(self.params, gparams, lr)
+
+        self.train = theano.function(inputs=[self.img_batch, self.normLoc, self.y, lr],
+                                     outputs=cost, updates=updates)
+
+        # probability of the predicted labels
+        self.pred_prob = theano.function(inputs=[self.img_batch, self.normLoc],
+                                         outputs=self.y_pred_prob)
+
+        # predicted labels
+        self.pred = theano.function(inputs=[self.img_batch, self.normLoc],
+                                    outputs=self.y_pred)
+
+        self.cost = theano.function(inputs=[self.img_batch, self.normLoc, self.y],
+                                    outputs=cost)
+
+        self.error = theano.function(inputs=[self.img_batch, self.normLoc, self.y],
+                                     outputs=error)
+
+    def save_to_file(self, file_name, file_index=None):
+        """
+        This function stores the trained params to '*.h5' file
+
+        Parameters
+        ----------
+        :type file_dir: str
+        :param file_dir: the directory with name to store trained parameters
+
+        :type file_index: str, generated as str(1)
+        :param file_index: if parameters here are snapshot,
+                           then we need to add index to file name
+        """
+        if file_index is not None:
+            file_name = file_name[:-3] + str(file_index) + '.h5'
+
+        f = h5py.File(file_name)
+        for p in self.params:
+            f[p.name] = p.get_value()
+        f.close()
+
+
 
 
 

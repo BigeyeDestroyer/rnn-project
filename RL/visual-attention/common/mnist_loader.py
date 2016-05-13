@@ -139,7 +139,11 @@ class DataSet(object):
     def epochs_completed(self):
         return self._epochs_completed
 
-    def next_batch(self, batch_size, fake_data=False):
+    @property
+    def index_in_epoch(self):
+        return self._index_in_epoch
+
+    def next_batch(self, batch_size, shuffle=True, fake_data=False):
         """ Return the next 'batch_size'
             examples from this data set
         """
@@ -160,7 +164,8 @@ class DataSet(object):
 
             # Shuffle the data
             perm = numpy.arange(self._num_examples)
-            numpy.random.shuffle(perm)
+            if shuffle:
+                numpy.random.shuffle(perm)
             self._images = self._images[perm]
             self._labels = self._labels[perm]
 

@@ -95,7 +95,7 @@ patience = (max_epochs / 10) * (train_set_x.shape[0] / batch_size)
 """ build the model
 """
 print('Building the model ...')
-model = RAM()
+model = RAM(depth=1)  # single scale model
 
 
 """ Optimization
@@ -170,14 +170,14 @@ try:
 
                     best_validation_cost = valid_cost
                     # save the model
-                    model_file = saveto + '/model_multi_scale.h5'
+                    model_file = saveto + '/model_single_scale.h5'
                     if os.path.isfile(model_file):
                         os.system('rm ' + model_file)
                     print('Saving model at iter%d ...' % iters)
                     model.save_to_file(model_file)
 
                     # save the errors
-                    err_file = saveto + '/err_multi_scale.npz'
+                    err_file = saveto + '/err_single_scale.npz'
                     numpy.savez(err_file, history_errs=history_err,
                                 history_train=history_train,
                                 history_cost=history_cost)
@@ -194,14 +194,14 @@ end_time = time.time()
 
 # after interrupt, we save the model
 # save the model
-model_file = saveto + '/model_multi_scale_final.h5'
+model_file = saveto + '/model_single_scale_final.h5'
 if os.path.isfile(model_file):
     os.system('rm ' + model_file)
 print('Saving model at iter%d ...' % iters)
 model.save_to_file(model_file)
 
 # save the errors
-err_file = saveto + '/err_multi_scale_final.npz'
+err_file = saveto + '/err_single_scale_final.npz'
 numpy.savez(err_file, history_errs=history_err,
             history_train=history_train,
             history_cost=history_cost)

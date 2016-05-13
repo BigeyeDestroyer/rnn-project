@@ -152,7 +152,7 @@ def adadelta(params, gparams, lr=0.001, rho=0.9, epsilon=1e-6):
     return updates
 
 
-def adam(params, gparams, lr=0.001, iUpdate=True, beta_1=0.9, beta_2=0.999, epsilon=1e-8):
+def adam(params, gparams, lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-8):
     """
     adam optimizer
 
@@ -163,9 +163,6 @@ def adam(params, gparams, lr=0.001, iUpdate=True, beta_1=0.9, beta_2=0.999, epsi
 
     :type lr: Theano Variable
     :param lr: learning rate
-
-    :type iUpdate: bool
-    :param iUpdate: whether to update the 'iterations'
 
     :type beta_1: always set to 0.9
     :param beta_1: coefficient for momentum
@@ -180,8 +177,7 @@ def adam(params, gparams, lr=0.001, iUpdate=True, beta_1=0.9, beta_2=0.999, epsi
 
     # learning rate dynamically determine
     iterations = theano.shared(value=numpy.asarray(0., dtype=theano.config.floatX))
-    if iUpdate:
-        updates.append((iterations, iterations + 1.))
+    updates.append((iterations, iterations + 1.))
 
     t = iterations + 1
     lr_t = lr * T.sqrt(1 - T.pow(beta_2, t)) / (1 - T.pow(beta_1, t))

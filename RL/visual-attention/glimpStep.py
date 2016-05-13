@@ -9,6 +9,7 @@ import h5py
 from layers.HiddenLayer import HiddenLayer
 import theano.tensor.signal.pool as pool
 import theano.tensor.nnet.abstract_conv as upsample
+from theano.tensor.shared_randomstreams import RandomStreams
 
 # images and labels are the inputs
 dataset = mnist_loader.read_data_sets("data")
@@ -38,6 +39,8 @@ g_size = 256
 
 cell_size = 256  # dimension of the LSTM's hidden state
 cell_out_size = cell_size
+
+loc_sd = 0.1
 
 
 totalSensorBandwidth = depth * channels * ((2 * sensorBandwidth) ** 2)
@@ -227,7 +230,6 @@ def _step(x_t, l_tm1, c_tm1, h_tm1):
     g_output = T.nnet.relu(T.dot(T.concatenate((hl_output, hg_output),
                                                axis=1), W_g) + b_g)
 
-
     preact = T.dot(g_output, W_lstm) + T.dot(h_tm1, U_lstm) + b_lstm
 
     i = T.nnet.sigmoid(_slice(preact, 0, cell_size))
@@ -237,14 +239,21 @@ def _step(x_t, l_tm1, c_tm1, h_tm1):
 
     c_t = f * c_tm1 + i * c_tilde
     h_t = o * T.tanh(c_t)
-    l_t = T.nnet.relu(T.dot(h_t, W_hl_out) + b_hl_out)
+    l_t = T.tanh(T.dot(h_t, W_hl_out) + b_hl_out)
 
     return l_t, c_t, h_t
 
 l_t, c_t, h_t = _step(x_t, l_tm1, c_tm1, h_tm1)
+
+srng = RandomStreams(seed=234)
+
+sampled_l_t = srng.normal(size=l_t.shape, avg=l_t, std=loc_sd)
+
+
 fn_step = theano.function(inputs=[img_batch, normLoc],
-                          outputs=[c_t, h_t, l_t])
+                          outputs=[c_t, h_t, sampled_l_t])
 c, h, l = fn_step(images, locs)
+
 
 print type(c)
 print c.shape
@@ -254,6 +263,7 @@ print h.shape
 
 print type(l)
 print l.shape
+print l[0: 5, :]
 
 
 """

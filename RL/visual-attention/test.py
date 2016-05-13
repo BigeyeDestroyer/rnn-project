@@ -1,27 +1,31 @@
-from layers.glimpseSensor import glimpseSensor
-import common.mnist_loader as mnist_loader
-import numpy
+from theano.tensor.shared_randomstreams import RandomStreams
 import theano.tensor as T
 import theano
+import numpy
 
-import time
-import math
+glimpse = 6
+batch_size = 16
+cell_size = 256
 
-dataset = mnist_loader.read_data_sets("data")
-images, labels = dataset.train.next_batch(batch_size=16)
-locs = numpy.random.uniform(low=-1, high=1, size=(images.shape[0], 2))
-print images.shape
-print labels.shape
+x_0 = T.matrix('x') # with size (16, 256)
+numpy_rng = numpy.random.RandomState(1234)
+variance = T.tensor3('var')
 
 
-img = T.matrix('img')
-loc = T.matrix('loc')
-# batch_size = T.iscalar('batch_size')
-model = glimpseSensor(layer_id=str(0), batch_size=16,
-                      img=img, normLoc=loc)
-zoom = model.zooms
-fn_zooms = theano.function(inputs=[img, loc], outputs=[zoom])
+def _step(var_t, x_tm1):
+    x_t = x_tm1 + var_t
+    return x_t
 
-y = fn_zooms(images, locs)[0]
-print type(y)
-print y.shape
+[x], _ = theano.scan(fn=_step,
+                     sequences=[variance],
+                     outputs_info=[x_0])
+
+fn_sample = theano.function(inputs=[x_0, variance],
+                            outputs=[x])
+
+x_out = fn_sample(numpy.random.randn(batch_size, cell_size),
+                  numpy_rng.normal(loc=0, scale=0.1,
+                                   size=(glimpse, batch_size, cell_size)))[0]
+
+print type(x_out)
+print len(x_out)

@@ -10,6 +10,7 @@ from layers.HiddenLayer import HiddenLayer
 import theano.tensor.signal.pool as pool
 import theano.tensor.nnet.abstract_conv as upsample
 from theano.tensor.shared_randomstreams import RandomStreams
+import math
 
 # images and labels are the inputs
 dataset = mnist_loader.read_data_sets("data")
@@ -17,6 +18,7 @@ images, labels = dataset.train.next_batch(batch_size=16)
 locs = numpy.random.uniform(low=-1, high=1, size=(images.shape[0], 2))
 print images.shape
 print labels.shape
+print type(labels[0])
 
 # images and locs as inputs
 
@@ -25,6 +27,8 @@ print labels.shape
 # normLoc : (batch_size, 2)
 img_batch = T.matrix('img')
 normLoc = T.matrix('loc')
+y = T.vector('label')
+
 
 batch_size = 16
 mnist_size = 28
@@ -39,9 +43,13 @@ g_size = 256
 
 cell_size = 256  # dimension of the LSTM's hidden state
 cell_out_size = cell_size
+n_classes = 10
+epsilon = 1e-6
 
-loc_sd = 0.1
-
+loc_sd = 0.01
+glimpses = 6
+numpy_rng = numpy.random.RandomState(1234)
+theano_rng = RandomStreams(numpy_rng.randint(2 ** 30))
 
 totalSensorBandwidth = depth * channels * ((2 * sensorBandwidth) ** 2)
 """ Sensor
@@ -202,6 +210,13 @@ W_values, b_values = initial_W_b(rng=numpy.random.RandomState(4567),
 W_hl_out = theano.shared(value=W_values, name='hl_out#W', borrow=True)
 b_hl_out = theano.shared(value=b_values, name='hl_out#b', borrow=True)
 
+# 6-th set of params, ga_out
+W_values, b_values = initial_W_b(rng=numpy.random.RandomState(5678),
+                                 n_in=cell_size,
+                                 n_out=n_classes)
+W_ha_out = theano.shared(value=W_values, name='ha_out#W', borrow=True)
+b_ha_out = theano.shared(value=b_values, name='ha_out#b', borrow=True)
+
 
 def _slice(x, n, dim):
     if x.ndim == 3:
@@ -210,84 +225,124 @@ def _slice(x, n, dim):
 
 """ Write the output for one step
 """
-l_tm1 = normLoc
-x_t = img_batch
-c_tm1 = T.alloc(floatX(0.), batch_size, cell_size)
-h_tm1 = T.alloc(floatX(0.), batch_size, cell_size)
 
 
-def _step(x_t, l_tm1, c_tm1, h_tm1):
+def _step(l_tm1, sampled_l_tm1, c_tm1, h_tm1, x_t):
+    """
+
+
+    :param l_tm1: the mean loc at time stamp t - 1
+    :param sampled_l_tm1 : sampled loc at time stamp t - 1
+    """
     # 1-st part, hl_output with size (batch, hl_size)
-    hl_output = T.nnet.relu(T.dot(l_tm1, W_hl) + b_hl)
+    # self.W_hl, self.b_hl
+    hl_output = T.nnet.relu(T.dot(sampled_l_tm1, W_hl) + b_hl)
 
     # 2-nd part, hg_net
-    glimpse_input = glimpseSensor(x_t, l_tm1)
+    # self.totalSensorBandwidth
+    # self.W_hg, self.b_hg
+    glimpse_input = glimpseSensor(x_t, sampled_l_tm1)
     hg_input = T.reshape(glimpse_input, (glimpse_input.shape[0],
                                          totalSensorBandwidth))
     hg_output = T.nnet.relu(T.dot(hg_input, W_hg) + b_hg)
 
     # 3-rd part, g_net with output size (batch, g_size)
+    # self.W_g, self.b_g
     g_output = T.nnet.relu(T.dot(T.concatenate((hl_output, hg_output),
                                                axis=1), W_g) + b_g)
 
+    # self.W_lstm, self.U_lstm, self.b_lstm
     preact = T.dot(g_output, W_lstm) + T.dot(h_tm1, U_lstm) + b_lstm
 
+    # self.cell_size
     i = T.nnet.sigmoid(_slice(preact, 0, cell_size))
     f = T.nnet.sigmoid(_slice(preact, 1, cell_size))
     o = T.nnet.sigmoid(_slice(preact, 2, cell_size))
     c_tilde = T.tanh(_slice(preact, 3, cell_size))
 
+    # self.W_hl_out, self.b_hl_out
     c_t = f * c_tm1 + i * c_tilde
     h_t = o * T.tanh(c_t)
     l_t = T.tanh(T.dot(h_t, W_hl_out) + b_hl_out)
 
-    return l_t, c_t, h_t
+    # 4-th part set of params: loc_sd, batch_size, theano_rng
+    # sampled_l_t is used for next input
+    # self.batch_size, self.loc_sd
+    sampled_l_t = l_t + theano_rng.normal(size=(batch_size, 2), avg=0, std=loc_sd)
 
-l_t, c_t, h_t = _step(x_t, l_tm1, c_tm1, h_tm1)
-
-srng = RandomStreams(seed=234)
-
-sampled_l_t = srng.normal(size=l_t.shape, avg=l_t, std=loc_sd)
-
-
-fn_step = theano.function(inputs=[img_batch, normLoc],
-                          outputs=[c_t, h_t, sampled_l_t])
-c, h, l = fn_step(images, locs)
+    return l_t, sampled_l_t, c_t, h_t
 
 
-print type(c)
-print c.shape
+# to use for maximum likelihood with glimpse location
+def gaussian_pdf(mean, sample):
+    Z = 1.0 / (loc_sd * T.sqrt(2.0 * math.pi))
+    exp_term = -T.square(sample - mean) / (2.0 * T.square(loc_sd))
+    return Z * T.exp(exp_term)
 
-print type(h)
-print h.shape
 
-print type(l)
-print l.shape
-print l[0: 5, :]
+
+
+[l, l_sampled, c, h], _ = theano.scan(fn=_step,
+                                      outputs_info=[normLoc,
+                                                    normLoc,
+                                                    T.alloc(floatX(0.), img_batch.shape[0], cell_size),
+                                                    T.alloc(floatX(0.), img_batch.shape[0], cell_size)],
+                                      non_sequences=img_batch,
+                                      n_steps=glimpses)
+
+outputs = T.reshape(h[-1], (batch_size, cell_out_size))
+p_y_given_x = T.nnet.softmax(T.dot(outputs, W_ha_out) + b_ha_out)
+y_pred = T.argmax(p_y_given_x, axis=1)
+
+R = T.cast(T.eq(y_pred, y), theano.config.floatX)  # with size (batch, )
+reward = T.mean(R)  # average reward of the batch
+
+p_loc = gaussian_pdf(mean=l, sample=l_sampled)
+p_loc = T.reshape(p_loc, (batch_size, 2 * glimpses))
+
+R = T.reshape(R, (batch_size, 1))  # reshape for furthur calculation
+J = T.concatenate((T.log(p_y_given_x + epsilon)[T.arange(y.shape[0]), T.cast(y, 'int32')],
+                   T.log(p_loc + epsilon) * R), axis=1)
+cost = -T.mean(T.sum(J, axis=1))
+
+
+
+
+fn_sample = theano.function(inputs=[img_batch, normLoc, y],
+                            outputs=[cost])
+
+prob = fn_sample(images, locs, labels)[0]
+print type(prob)
+print prob.shape
+print prob
+
+
+
+
 
 
 """
-fn_g = theano.function(inputs=[img_batch, normLoc],
-                       outputs=[g_output])
-g_out = fn_g(images, locs)[0]
-print type(g_out)
-print g_out.shape
-"""
+fn_sample = theano.function(inputs=[img_batch, normLoc],
+                            outputs=[l, l_sampled, c, h])
+
+l_mean, l_s, c_out, h_out = fn_sample(images, locs)
+
+print type(l_mean)
+print l_mean.shape
+print l_mean[0, 0, :]
+
+print type(l_s)
+print l_s.shape
+print l_s[0, 0, :]
+
+print type(c_out)
+print c_out.shape
+
+print type(h_out)
+print h_out.shape """
 
 
-"""
-fn_reshape = theano.function(inputs=[img_batch, normLoc],
-                             outputs=[glimpseLayer.zooms])
 
-zoom_reshape = fn_reshape(images, locs)[0]
-
-f = h5py.File('zoom.h5')
-f['zoom'] = zoom_reshape
-f.close()
-
-print type(zoom_reshape)
-print zoom_reshape.shape
-"""
 
 
 

@@ -147,9 +147,71 @@ def glimpseSensor(img_batch, normLoc, batch_size=16, mnist_size=28,
 """
 
 
+def initial_W_b(rng, n_in, n_out):
+    """ This function initializes the
+        params for a single layer MLP
+
+    :param n_in: input dimension
+    :param n_out: output dimension
+    """
+    W_values = numpy.asarray(rng.uniform(
+        low=-numpy.sqrt(6. / (n_in + n_out)),
+        high=numpy.sqrt(6. / (n_in + n_out)),
+        size=(n_in, n_out)
+    ),
+        dtype=theano.config.floatX
+    )
+
+    b_values = numpy.zeros((n_out,), dtype=theano.config.floatX)
+    return W_values, b_values
+
+""" Initialize parameters
+"""
+# 1-st set of params: W_hl, b_hl
+W_values, b_values = initial_W_b(rng=numpy.random.RandomState(1234),
+                                 n_in=2, n_out=hl_size)
+W_hl = theano.shared(value=W_values, name='hl_net#W', borrow=True)
+b_hl = theano.shared(value=b_values, name='hl_net#b', borrow=True)
+
+# 2-nd set of params: W_hg, b_hg
+W_values, b_values = initial_W_b(rng=numpy.random.RandomState(2345),
+                                 n_in=totalSensorBandwidth,
+                                 n_out=hg_size)
+W_hg = theano.shared(value=W_values, name='hg_net#W', borrow=True)
+b_hg = theano.shared(value=b_values, name='hg_net#b', borrow=True)
 
 
+# 3-rd set of params: W_g, b_g
+W_values, b_values = initial_W_b(rng=numpy.random.RandomState(3456),
+                                 n_in=hl_size + hg_size,
+                                 n_out=g_size)
+W_g = theano.shared(value=W_values, name='g_net#W', borrow=True)
+b_g = theano.shared(value=b_values, name='g_net#b', borrow=True)
 
+# 4-th part, LSTMCore params: W, U
+W_lstm = init_weights(shape=(g_size, 4 * cell_size),
+                      name='LSTMCore#W')
+U_lstm = theano.shared(
+    value=numpy.concatenate((ortho_weight(ndim=cell_size),
+                             ortho_weight(ndim=cell_size),
+                             ortho_weight(ndim=cell_size),
+                             ortho_weight(ndim=cell_size)),
+                            axis=1), name='LSTMCore#U')
+b_lstm = init_bias(size=4 * cell_size, name='LSTMCore#b')
+
+# 5-th part set of params gl_out: W_hl_out, b_hl_out
+W_values, b_values = initial_W_b(rng=numpy.random.RandomState(4567),
+                                 n_in=cell_size,
+                                 n_out=2)
+W_hl_out = theano.shared(value=W_values, name='hl_out#W', borrow=True)
+b_hl_out = theano.shared(value=b_values, name='hl_out#b', borrow=True)
+
+# 6-th set of params, ga_out
+W_values, b_values = initial_W_b(rng=numpy.random.RandomState(5678),
+                                 n_in=cell_size,
+                                 n_out=n_classes)
+W_ha_out = theano.shared(value=W_values, name='ha_out#W', borrow=True)
+b_ha_out = theano.shared(value=b_values, name='ha_out#b', borrow=True)
 
 
 def _slice(x, n, dim):

@@ -36,6 +36,9 @@ hg_size = 128
 hl_size = 128
 g_size = 256
 
+cell_size = 256  # dimension of the LSTM's hidden state
+cell_out_size = cell_size
+
 
 totalSensorBandwidth = depth * channels * ((2 * sensorBandwidth) ** 2)
 """ Sensor
@@ -178,48 +181,88 @@ W_values, b_values = initial_W_b(rng=numpy.random.RandomState(3456),
 W_g = theano.shared(value=W_values, name='g_net#W', borrow=True)
 b_g = theano.shared(value=b_values, name='g_net#b', borrow=True)
 
+# 4-th part, LSTMCore params: W, U
+W_lstm = init_weights(shape=(g_size, 4 * cell_size),
+                      name='LSTMCore#W')
+U_lstm = theano.shared(
+    value=numpy.concatenate((ortho_weight(ndim=cell_size),
+                             ortho_weight(ndim=cell_size),
+                             ortho_weight(ndim=cell_size),
+                             ortho_weight(ndim=cell_size)),
+                            axis=1), name='LSTMCore#U')
+b_lstm = init_bias(size=4 * cell_size, name='LSTMCore#b')
 
-# 1-st part, hl_net
-hl_output = T.nnet.relu(T.dot(normLoc, W_hl) + b_hl)
+# 5-th part set of params gl_out: W_hl_out, b_hl_out
+W_values, b_values = initial_W_b(rng=numpy.random.RandomState(4567),
+                                 n_in=cell_size,
+                                 n_out=2)
+W_hl_out = theano.shared(value=W_values, name='hl_out#W', borrow=True)
+b_hl_out = theano.shared(value=b_values, name='hl_out#b', borrow=True)
 
-# 2-nd part, hg_net
-glimpse_input = glimpseSensor(img_batch, normLoc)
-hg_input = T.reshape(glimpse_input, (glimpse_input.shape[0],
-                                     totalSensorBandwidth))
-hg_output = T.nnet.relu(T.dot(hg_input, W_hg) + b_hg)
 
-# 3-rd part, g_net with output size (batch, 256)
-g_output = T.nnet.relu(T.dot(T.concatenate((hl_output, hg_output),
-                                           axis=1), W_g) + b_g)
+def _slice(x, n, dim):
+    if x.ndim == 3:
+        return x[:, :, n * dim: (n + 1) * dim]
+    return x[:, n * dim: (n + 1) * dim]
+
+""" Write the output for one step
+"""
+l_tm1 = normLoc
+x_t = img_batch
+c_tm1 = T.alloc(floatX(0.), batch_size, cell_size)
+h_tm1 = T.alloc(floatX(0.), batch_size, cell_size)
+
+
+def _step(x_t, l_tm1, c_tm1, h_tm1):
+    # 1-st part, hl_output with size (batch, hl_size)
+    hl_output = T.nnet.relu(T.dot(l_tm1, W_hl) + b_hl)
+
+    # 2-nd part, hg_net
+    glimpse_input = glimpseSensor(x_t, l_tm1)
+    hg_input = T.reshape(glimpse_input, (glimpse_input.shape[0],
+                                         totalSensorBandwidth))
+    hg_output = T.nnet.relu(T.dot(hg_input, W_hg) + b_hg)
+
+    # 3-rd part, g_net with output size (batch, g_size)
+    g_output = T.nnet.relu(T.dot(T.concatenate((hl_output, hg_output),
+                                               axis=1), W_g) + b_g)
+
+
+    preact = T.dot(g_output, W_lstm) + T.dot(h_tm1, U_lstm) + b_lstm
+
+    i = T.nnet.sigmoid(_slice(preact, 0, cell_size))
+    f = T.nnet.sigmoid(_slice(preact, 1, cell_size))
+    o = T.nnet.sigmoid(_slice(preact, 2, cell_size))
+    c_tilde = T.tanh(_slice(preact, 3, cell_size))
+
+    c_t = f * c_tm1 + i * c_tilde
+    h_t = o * T.tanh(c_t)
+    l_t = T.nnet.relu(T.dot(h_t, W_hl_out) + b_hl_out)
+
+    return l_t, c_t, h_t
+
+l_t, c_t, h_t = _step(x_t, l_tm1, c_tm1, h_tm1)
+fn_step = theano.function(inputs=[img_batch, normLoc],
+                          outputs=[c_t, h_t, l_t])
+c, h, l = fn_step(images, locs)
+
+print type(c)
+print c.shape
+
+print type(h)
+print h.shape
+
+print type(l)
+print l.shape
 
 
 """
-# Below is the body of LSTMCell
-rng = numpy.random.RandomState(4567)
-prefix = 'LSTMCore'
-in_size = 256
-hid_size = 256
-
-# W and U are the shared variables
-W = init_weights(shape=(in_size, 4 * hid_size),
-                 name=prefix + '#W')
-
-U = theano.shared(value=numpy.concatenate((ortho_weight(ndim=hid_size),
-                                           ortho_weight(ndim=hid_size),
-                                           ortho_weight(ndim=hid_size),
-                                           ortho_weight(ndim=hid_size)),
-                                          axis=1),
-                  name=prefix + '#U')
-
-b = init_bias(size=4 * hid_size, name=prefix + '#b')
-
-"""
-
 fn_g = theano.function(inputs=[img_batch, normLoc],
                        outputs=[g_output])
 g_out = fn_g(images, locs)[0]
 print type(g_out)
 print g_out.shape
+"""
 
 
 """

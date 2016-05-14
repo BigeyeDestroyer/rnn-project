@@ -84,7 +84,7 @@ lr = 1e-3
 batch_size = 128
 
 dispFreq = 10  # print each 10 mini-batch
-validFreq = 100  # valid every 100 mini-batch
+validFreq = 200  # valid every 200 mini-batch
 saveto = 'model'
 
 max_epochs = 300

@@ -43,6 +43,10 @@ class Parameters(object):
         del self.__dict__['params'][key]
 
     def values(self):
+        """
+        :return: all the shared variables in
+                 the dictionary 'params'
+        """
         params = self.__dict__['params']
         return params.values()
 
@@ -50,3 +54,24 @@ class Parameters(object):
         params = self.__dict__['params']
         with open(filename, 'wb') as f:
             pickle.dump({p.name: p.get_value() for p in params.values()}, f, 2)
+
+    def load(self, filename):
+        params = self.__dict__['params']
+        loaded = pickle.load(open(filename, 'rb'))
+        for k in params:
+            if k in loaded:
+                params[k].set_value(loaded[k])
+            else:
+                print('%s does not exist.' % k)
+
+    def parameter_count(self):
+        import operator
+        params = self.__dict__['params']
+        count = 0
+        for p in params.values():
+            shape = p.get_value().shape
+            if len(shape) == 0:
+                count += 1
+            else:
+                count += reduce(operator.mul, shape)
+        return count

@@ -75,3 +75,21 @@ class Parameters(object):
             else:
                 count += reduce(operator.mul, shape)
         return count
+
+    # Not sure about the functions for
+    # the following two functions
+    def __enter__(self):
+        _, _, _, env_locals = inspect.getargvalues(
+            inspect.currentframe().f_back)
+        self.__dict__['_env_locals'] = env_locals.keys()
+
+    def __exit__(self, type, value, traceback):
+        _, _, _, env_locals = inspect.getargvalues(
+            inspect.currentframe().f_back)
+        prev_env_locals = self.__dict__['_env_locals']
+        del self.__dict__['_env_locals']
+        for k in env_locals.keys():
+            if k not in prev_env_locals:
+                self.__setattr__(k, env_locals[k])
+                env_locals[k] = self.__getattr__(k)
+        return Trues

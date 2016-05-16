@@ -56,7 +56,7 @@ P['b_%d_add' % id] = 0. * initial_weights(mem_width)
 x = T.matrix('controller_output')
 
 # 1. Content Addressing: key and beta
-key_t = T.dot(x, P['W_%d_key' % id] + P['b_%d_key' % id])
+key_t = T.dot(x, P['W_%d_key' % id]) + P['b_%d_key' % id]
 beta_t = T.nnet.softplus(T.dot(x, P['W_%d_beta' % id]) +
                          P['b_%d_beta' % id])
 
@@ -76,6 +76,7 @@ shift_t.name = 'shift_t'
 gamma_t = T.nnet.softplus(T.dot(x, P['W_%d_gamma' % id]) +
                           P['b_%d_gamma' % id]) + 1.
 
+# 5. Erase and Add vector
 erase_t = T.nnet.sigmoid(T.dot(x, P['W_%d_erase' % id]) +
                          P['b_%d_erase' % id])
 add_t = T.dot(x, P['W_%d_add' % id]) + P['b_%d_add' % id]

@@ -20,10 +20,6 @@ def initial_weights(*argv):
     )
 
 
-def vector_softmax(vec):
-    return T.nnet.softmax(vec.reshape((1, vec.shape[0])))[0]
-
-
 # Since the input_size is hidden_layers[-1]
 # we are actually writing the codes for 'write head'
 P = Parameters()

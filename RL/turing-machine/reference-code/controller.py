@@ -10,7 +10,8 @@ from collections import namedtuple
 #from theano_toolkit.parameters import Parameters
 
 
-def build(P, input_size, output_size, mem_size, mem_width, layer_sizes):
+def build(P, input_size=8, output_size=8, mem_size=128, mem_width=20, layer_sizes=[100]
+    ):
     """
     Create controller function for use during scan op
     """

@@ -116,9 +116,11 @@ class Head(object):
                                       self.b_erase)
         self.add_t = T.dot(self.X, self.W_add) + self.b_add
 
+        # Collect all the outputs of head
         self.head_output = [self.key_t, self.beta_t,
                             self.g_t, self.shift_t,
-                            self.gamma_t]
+                            self.gamma_t,
+                            self.erase_t, self.add_t]
 
 
 

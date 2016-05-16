@@ -6,18 +6,25 @@ from theano_toolkit import utils as U
 
 def build(P, id, input_size, mem_width, mem_size, shift_width):
 
+    # 1. content addressing 
     P["W_%d_key" % id] = U.initial_weights(input_size, mem_width)
     P["b_%d_key" % id] = 0. * U.initial_weights(mem_width)
-    P["W_%d_shift" % id] = U.initial_weights(input_size, shift_width)
-    P["b_%d_shift" % id] = 0. * U.initial_weights(shift_width)
-
     P["W_%d_beta" % id] = 0. * U.initial_weights(input_size)
     P["b_%d_beta" % id] = 0.
-    P["W_%d_gamma" % id] = U.initial_weights(input_size)
-    P["b_%d_gamma" % id] = 0.
+
+    # 2. interpolation 
     P["W_%d_g" % id] = U.initial_weights(input_size)
     P["b_%d_g" % id] = 0.
 
+    # 3. convolutional shift
+    P["W_%d_shift" % id] = U.initial_weights(input_size, shift_width)
+    P["b_%d_shift" % id] = 0. * U.initial_weights(shift_width)
+    
+    # 4. sharpening 
+    P["W_%d_gamma" % id] = U.initial_weights(input_size)
+    P["b_%d_gamma" % id] = 0.
+    
+    # 5. erase and add vector 
     P["W_%d_erase" % id] = U.initial_weights(input_size, mem_width)
     P["b_%d_erase" % id] = 0. * U.initial_weights(mem_width)
     P["W_%d_add" % id] = U.initial_weights(input_size, mem_width)

@@ -92,4 +92,4 @@ class Parameters(object):
             if k not in prev_env_locals:
                 self.__setattr__(k, env_locals[k])
                 env_locals[k] = self.__getattr__(k)
-        return Trues
+        return True

@@ -42,9 +42,9 @@ P.b_output = 0. * initial_weights(output_size)
 
 
 def controller(input_t, read_t):
-    prev_layer = hidden_0 = T.tanh(
+    prev_layer = T.tanh(
         T.dot(input_t, P.W_input_hidden) +
-        T.dot(input_t, P.W_read_hidden) +
+        T.dot(read_t, P.W_read_hidden) +
         P.b_hidden_0
     )
 

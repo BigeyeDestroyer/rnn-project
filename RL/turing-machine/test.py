@@ -2,33 +2,30 @@ import theano
 import theano.tensor as T
 import numpy
 from head import Head
+from controller import *
 
 X = T.matrix('X')
-model = Head(X=X)
-fn_output = theano.function(inputs=[X],
-                            outputs=model.head_output)
+read_input = T.matrix('read_input')
+batch_size = 5
+input_size = 8
+output_size = 8
+mem_size = 128
+mem_width = 20
+layer_sizes = [100, 200, 300]
 
-a = numpy.random.randn(5, 100)
-key, beta, g, shift, gamma, erase, add = fn_output(a)
+model = ControllerFeedforward(X=X, read_input=read_input,
+                              layer_sizes=layer_sizes)
+fn_out = theano.function(inputs=[X, read_input],
+                         outputs=[model.fin_hidden, model.output])
 
-print type(key)
-print key.shape
+x = numpy.random.randn(batch_size, input_size)
+read = numpy.random.randn(batch_size, mem_width)
+[fin_hid, output] = fn_out(x, read)
 
-print type(beta)
-print beta.shape
+print type(fin_hid)
+print fin_hid.shape
 
-print type(g)
-print g.shape
+print type(output)
+print output.shape
 
-print type(shift)
-print shift.shape
-
-print type(gamma)
-print gamma.shape
-
-print type(erase)
-print erase.shape
-
-print type(add)
-print add.shape
 

@@ -2,11 +2,8 @@ from common.utils import *
 import theano
 import theano.tensor as T
 import numpy
-
-mem_size = 128
-mem_width = 20
-
-
+from head import *
+from controller import ControllerFeedforward
 
 
 def cosine_sim(k, M):
@@ -26,6 +23,15 @@ def cosine_sim(k, M):
     M_unit = M / (M_lengths + 1e-5)
     return T.dot(k_unit, T.transpose(M_unit))
 
+
+controller_size = 100
+mem_size = 128
+mem_width = 20
+similarity = cosine_sim
+shift_width = 3
+no_heads = 1
+
+""" Test for the cosine_sim function
 k = T.matrix('k')  # with size (batch_size, mem_width)
 M = T.matrix('M')  # with size (mem_size, mem_width)
 cosine_sim = cosine_sim(k, M)
@@ -36,6 +42,9 @@ k_in = numpy.random.randn(5, mem_width)
 M_in = numpy.random.randn(mem_size, mem_width)
 
 cos_sim = fn_unit(k_in, M_in)
+"""
+
+
 
 
 

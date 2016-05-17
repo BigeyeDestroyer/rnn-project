@@ -2,7 +2,7 @@ import theano
 import theano.tensor as T
 import numpy
 from common.utils import *
-import operator
+
 
 class WriteHead(object):
     def __init__(self, X, number=0, input_size=100, mem_size=128,
@@ -121,9 +121,6 @@ class WriteHead(object):
                             self.g_t, self.shift_t,
                             self.gamma_t,
                             self.erase_t, self.add_t]
-        
-        # Now, calculate the number of parameters
-
 
 
 class ReadHead(object):

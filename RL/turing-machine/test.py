@@ -38,13 +38,16 @@ shift_width = 3
 X = T.matrix('X')  # with size (batch, input_size)
 
 model = ReadHead(X=X)
-key, beta, g, shift, gamma = model.head_output
 
-fn_out = theano.function(inputs=[X], outputs=[key, beta, g, shift, gamma])
+
+
 
 data = numpy.random.randn(5, input_size)
-k, b, gg, s, ga = fn_out(data)
 
+"""
+key, beta, g, shift, gamma = model.head_output
+fn_out = theano.function(inputs=[X], outputs=[key, beta, g, shift, gamma])
+k, b, gg, s, ga = fn_out(data)
 print type(k)
 print k.shape
 
@@ -59,6 +62,13 @@ print s.shape
 
 print type(ga)
 print ga.shape
+"""
+
+fn_count = theano.function(inputs=[X], outputs=model.count)
+count = fn_count(data)
+
+print type(count)
+print count
 
 
 

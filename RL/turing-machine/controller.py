@@ -5,15 +5,9 @@ from common.utils import *
 
 
 class ControllerFeedforward(object):
-    def __init__(self, X, read_input, input_size=8, output_size=8,
+    def __init__(self, input_size=8, output_size=8,
                  mem_size=128, mem_width=20, layer_sizes=[100]):
         """
-        :type X: theano tensor, with size (batch, input_size)
-        :param X: the input from outside environment
-
-        :type read_input: theano tensor, with size (batch, mem_width)
-        :param read_input: the input from memory matrix
-
         :type input_size: int
         :param input_size: the input size of outside input
 
@@ -29,8 +23,6 @@ class ControllerFeedforward(object):
         :type layer_sizes: list of ints
         :param layer_sizes: hidden sizes of the controller
         """
-        self.X = X
-        self.read_input = read_input
 
         self.input_size = input_size
         self.output_size = output_size
@@ -64,24 +56,33 @@ class ControllerFeedforward(object):
         self.W_read_hidden = glorot_uniform(shape=(mem_width, layer_sizes[0]), name='W_hidden_read')
         self.params.append(self.W_read_hidden)
 
-        self.activations = []
-        for i in range(len(layer_sizes)):
+    def step_controller(self, X, read_input):
+        """
+        :type X: theano tensor, with size (batch, input_size)
+        :param X: input from outside environment at one time step
+
+        :type read_input: theano tensor, with size (batch, mem_width)
+        :param read_input: input from memory matrix at one time step
+        """
+        activations = []
+        for i in range(len(self.layer_sizes)):
             if i == 0:
                 # activations[0] with size (batch, layer_size[0])
-                self.activations.append(T.tanh(T.dot(self.X, self.layers[i][0]) +
-                                               T.dot(self.read_input, self.W_read_hidden) +
-                                               self.layers[i][1]))
+                activations.append(T.tanh(T.dot(X, self.layers[i][0]) +
+                                          T.dot(read_input, self.W_read_hidden) +
+                                          self.layers[i][1]))
             else:  # i = 1, 2, ..., len(layer_sizes) - 1
-                self.activations.append(T.tanh(T.dot(self.activations[-1],
-                                                     self.layers[i][0]) +
-                                               self.layers[i][1]))
+                activations.append(T.tanh(T.dot(activations[-1],
+                                                self.layers[i][0]) +
+                                          self.layers[i][1]))
         # Activations of the last hidden layer
         # with size (batch, layer_sizes[-1])
-        self.fin_hidden = self.activations[-1]
+        fin_hidden = activations[-1]
         # Outputs of the controller
-        self.output = T.nnet.sigmoid(T.dot(self.fin_hidden,
-                                           self.layers[-1][0]) +
-                                     self.layers[-1][1])
+        output = T.nnet.sigmoid(T.dot(fin_hidden,
+                                      self.layers[-1][0]) +
+                                self.layers[-1][1])
+        return fin_hidden, output
 
 
 

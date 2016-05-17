@@ -89,6 +89,28 @@ def init_bias(size, name):
                          name=name)
 
 
+def init_array(array, name):
+    """
+    This function initializes an array
+    with given values
+
+    Parameters
+    ----------
+    :type array: 2D ndarray
+    :param array: values to setup the shared variable
+
+    :type name: string
+    :param name: name of the shared variable
+    """
+    return theano.shared(
+        value=numpy.asarray(
+            array,
+            dtype=theano.config.floatX
+        ),
+        name=name
+    )
+
+
 def init_scalar(value, name):
     """
     This function initializes a scalar

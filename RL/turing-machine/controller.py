@@ -56,7 +56,7 @@ class ControllerFeedforward(object):
         self.W_read_hidden = glorot_uniform(shape=(mem_width, layer_sizes[0]), name='W_hidden_read')
         self.params.append(self.W_read_hidden)
 
-    def step_controller(self, X, read_input):
+    def step(self, X, read_input):
         """
         :type X: theano tensor, with size (batch, input_size)
         :param X: input from outside environment at one time step

@@ -88,7 +88,7 @@ class ReadHead(object):
                        self.W_shift, self.b_shift,
                        self.W_gamma, self.b_gamma]
 
-    def step(self, x_t, w_tm1, M_t):
+    def step(self, x_t, w_tm1, M_tm1):
         """
         :type x_t: tensor variable with size (batch, input_size) at time t
         :param x_t: input to head, usually from last layer of controller
@@ -98,8 +98,8 @@ class ReadHead(object):
         :type w_tm1: tensor variable with size (batch_size, mem_size)
         :param w_tm1: head's weight at last time step
 
-        :type M_t: tensor variable with size (mem_size, mem_width) at time t
-        :param M_t: memory matrix at time t
+        :type M_tm1: tensor variable with size (mem_size, mem_width) at time t - 1
+        :param M_tm1: memory matrix at time t - 1
         """
         # Calculate the Head's outputs
         """ 1. Content Addressing: key_t and beta_t
@@ -137,7 +137,7 @@ class ReadHead(object):
         #        dimshuffle makes it with size (batch, 1)
         # Thus, the multi will broadcast along dim1 of similarity
         w_c_t = T.nnet.softmax(beta_t.dimshuffle(0, 'x') *
-                               self.similarity(key_t, M_t))
+                               self.similarity(key_t, M_tm1))
 
         """ 2. Interpolation: w_g_t, with size (batch, mem_size)
         """
@@ -261,7 +261,7 @@ class WriteHead(object):
                        self.W_gamma, self.b_gamma,
                        self.W_erase, self.b_erase, self.W_add, self.b_add]
 
-    def step(self, x_t, w_tm1, M_t):
+    def step(self, x_t, w_tm1, M_tm1):
         """
         :type x_t: tensor variable with size (batch, input_size) at time t
         :param x_t: input to head, usually from last layer of controller
@@ -271,8 +271,8 @@ class WriteHead(object):
         :type w_tm1: tensor variable with size (batch_size, mem_size)
         :param w_tm1: head's weight at last time step
 
-        :type M_t: tensor variable with size (mem_size, mem_width) at time t
-        :param M_t: memory matrix at time t
+        :type M_tm1: tensor variable with size (mem_size, mem_width) at time t
+        :param M_tm1: memory matrix at time t - 1
         """
 
         # Calculate the Head's outputs
@@ -319,7 +319,7 @@ class WriteHead(object):
         #        dimshuffle makes it with size (batch, 1)
         # Thus, the multi will broadcast along dim1 of similarity
         w_c_t = T.nnet.softmax(beta_t.dimshuffle(0, 'x') *
-                               self.similarity(key_t, M_t))
+                               self.similarity(key_t, M_tm1))
 
         """ 2. Interpolation: w_g_t, with size (batch, mem_size)
         """

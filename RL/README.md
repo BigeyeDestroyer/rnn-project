@@ -65,6 +65,46 @@ This folder is for resources related to reinforcemnet learning.
 		- [neural random access][34]: 2015 arxiv, 5 cited
 		- [neural programmer][35]: 2015 ICLR, 8 cited
 
+### ICML2016 reinforcement learning
+- [Doubly Robust Off-policy Value Evaluation for Reinforcement Learning][36]
+	- Study the problem of **off-policy problem** in RL. 
+	- Extend **doubly robust estimator** to get **unbiased** and **lower variance** results. 
+	- Work from **Microsoft**
+
+- [Smooth Imitation Learning][37]
+	- The goal is to **train a policy** that can **imitate  human behavior** in a **dynamic and continuous environment** 
+	- Work from **Caltech**
+
+- [The Knowledge Gradient for Sequential Decision Making with Stochastic Binary Feedbacks][38]
+	- **Small samples** and **time-consuming observation** environment 
+	- Work from **Princeton**
+
+- [Benchmarking **Deep Reinforcement Learning** for Continuous Control][39]
+	- Continuous control
+	- Work from **Berkeley**
+
+- [Asynchronous Methods for **Deep Reinforcement Learning**][40]
+	- Asynchronous gradient descent 
+	- Work from **GoogleDeepmind**
+
+- [Dueling Network Architectures for **Deep Reinforcement Learning**][41]
+	- A new network architecture 
+	- Work from **GoogleDeepmind**
+	- 10 cited already 
+
+- [Data-Efficient Off-Policy Policy Evaluation for Reinforcement Learning][42]
+	- A new way of **predicting the performance** of RL
+	- Work from **CMU**
+
+- [Hierarchical Decision Making In Electricity Grid Management][43]
+	- Algorithm that alternates between **Slow-time policy improvement** and **fast-time value function approximation** 
+	- Work from **Israel**
+	- 9 cited
+
+- [Improving the Efficiency of **Deep Reinforcement Learning** with Normalized Advantage Functions and Synthetic Experience][44]
+	- **Reduce sample complexity** of **deep reinforcement learning** 
+	- Work from **GoogleDeepmind**
+
 [1]:	https://github.com/BigeyeDestroyer/deepRL/tree/resource
 [2]:	http://mnemstudio.org/path-finding-q-learning-tutorial.htm
 [3]:	http://www.infoq.com/cn/articles/atari-reinforcement-learning
@@ -100,3 +140,12 @@ This folder is for resources related to reinforcemnet learning.
 [33]:	http://arxiv.org/abs/1511.07275
 [34]:	http://arxiv.org/abs/1511.06392
 [35]:	http://arxiv.org/abs/1511.04834
+[36]:	http://arxiv.org/abs/1511.03722
+[37]:	http://hoangminhle.github.io/
+[38]:	https://arxiv.org/abs/1510.02354
+[39]:	https://arxiv.org/abs/1604.06778
+[40]:	https://arxiv.org/abs/1602.01783
+[41]:	http://arxiv.org/abs/1511.06581
+[42]:	http://arxiv.org/abs/1604.00923
+[43]:	http://arxiv.org/abs/1603.01840
+[44]:	http://arxiv.org/abs/1603.00748

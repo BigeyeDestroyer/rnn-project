@@ -4,6 +4,7 @@ import numpy
 from head import *
 from controller import *
 from common.utils import *
+import scipy
 
 
 """ Test controller
@@ -33,37 +34,41 @@ print type(out)
 print out.shape
 """
 
-""" Test readhead
+# Test readhead
+batch_size = 5
 number = 0
 input_size = 100
 mem_size = 128
 mem_width = 20
 shift_width = 3
-X = T.matrix('X')  # with size (batch, input_size)
+x_t = T.matrix('x_t')  # with size (batch, input_size)
+w_tm1 = T.matrix('w_tm1')  # with size (batch, mem_size)
+M_t = T.matrix('M_t')  # with size (mem_size, mem_width)
 
-model = ReadHead()
-key, beta, g, shift, gamma = model.step_readhead(X=X)
-fn_out = theano.function(inputs=[X],
-                         outputs=[key, beta, g, shift, gamma])
+model = WriteHead()
+w_t, erase_t, add_t = model.step(x_t, w_tm1, M_t)
+fn_out = theano.function(inputs=[x_t, w_tm1, M_t],
+                         outputs=[w_t, erase_t, add_t])
 
-data = numpy.random.randn(5, input_size)
-key_data, beta_data, g_data, shift_data, gamma_data = fn_out(data)
+data_x = numpy.random.randn(batch_size, input_size)
+data_w = numpy.random.rand(batch_size, mem_size)
+data_w = numpy.exp(data_w) / numpy.reshape(numpy.sum(numpy.exp(data_w), axis=1), (batch_size, 1))
+data_M = numpy.random.randn(mem_size, mem_width)
 
-print type(key_data)
-print key_data.shape
+output, out_erase, out_add = fn_out(data_x, data_w, data_M)
 
-print type(beta_data)
-print beta_data.shape
+print type(output)
+print output.shape
+print numpy.sum(output, axis=1)
 
-print type(g_data)
-print g_data.shape
+print type(out_erase)
+print out_erase.shape
 
-print type(shift_data)
-print shift_data.shape
+print type(out_add)
+print out_add.shape
 
-print type(gamma_data)
-print gamma_data.shape """
 
+"""
 number = 0
 input_size = 100
 mem_size = 128
@@ -99,6 +104,11 @@ print erase_data.shape
 
 print type(add_data)
 print add_data.shape
+"""
+
+
+
+
 
 
 

@@ -8,8 +8,8 @@ from common.utils import *
 import scipy
 import operator
 
-""" Test the controller
 
+""" Test controller
 batch_size = 5
 input_size = 8
 output_size = 8
@@ -66,6 +66,8 @@ print data_out[3].shape
 """
 
 
+
+""" Test head
 batch_size = 5
 number = 0
 last_dim = 100
@@ -99,3 +101,4 @@ print w_out.shape
 
 print type(read_out)
 print read_out.shape
+"""

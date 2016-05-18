@@ -2,7 +2,7 @@ from common.utils import *
 import theano
 import theano.tensor as T
 import numpy
-from head_backup import *
+from head import *
 from controller_feedforward import *
 import scipy
 

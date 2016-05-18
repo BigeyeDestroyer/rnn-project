@@ -1,7 +1,7 @@
 import theano
 import theano.tensor as T
 import numpy
-from head_backup import *
+from head import *
 from controller_feedforward import *
 from controller_lstm import *
 from common.utils import *
@@ -66,5 +66,36 @@ print data_out[3].shape
 """
 
 
+batch_size = 5
+number = 0
+last_dim = 100
+mem_size = 128
+mem_width = 20
+shift_width = 3
+similarity = cosine_sim
+is_write = False
 
 
+model = Head(is_write=is_write)
+
+M_tm1 = T.matrix('M_tm1')  # with size (mem_size, mem_width)
+w_tm1 = T.matrix('w_tm1')  # with size (batch_size, mem_size)
+last_hidden = T.matrix('last_hidden')  # with size (batch, last_dim)
+
+w_t, read_t = model.step(M_tm1=M_tm1, w_tm1=w_tm1,
+                                 last_hidden=last_hidden)
+
+fn_head = theano.function(inputs=[M_tm1, w_tm1, last_hidden],
+                          outputs=[w_t, read_t])
+
+M_in = numpy.random.randn(mem_size, mem_width)
+w_in = numpy.random.randn(batch_size, mem_size)
+last_in = numpy.random.randn(batch_size, last_dim)
+
+w_out, read_out = fn_head(M_in, w_in, last_in)
+
+print type(w_out)
+print w_out.shape
+
+print type(read_out)
+print read_out.shape

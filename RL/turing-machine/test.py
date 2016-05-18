@@ -1,7 +1,7 @@
 import theano
 import theano.tensor as T
 import numpy
-from head import *
+from head_backup import *
 from controller_feedforward import *
 from controller_lstm import *
 from common.utils import *
@@ -9,7 +9,7 @@ import scipy
 import operator
 
 """ Test the controller
-"""
+
 batch_size = 5
 input_size = 8
 output_size = 8
@@ -63,6 +63,7 @@ print data_out[2].shape
 
 print type(data_out[3])
 print data_out[3].shape
+"""
 
 
 

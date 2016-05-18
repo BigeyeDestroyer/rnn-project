@@ -5,6 +5,7 @@ from head import *
 from controller import *
 from common.utils import *
 import scipy
+import operator
 
 
 """ Test controller
@@ -34,6 +35,7 @@ print type(out)
 print out.shape
 """
 
+"""
 # Test readhead
 batch_size = 5
 number = 0
@@ -66,7 +68,7 @@ print out_erase.shape
 
 print type(out_add)
 print out_add.shape
-
+"""
 
 """
 number = 0
@@ -106,6 +108,23 @@ print type(add_data)
 print add_data.shape
 """
 
+model_write = WriteHead()
+model_read = ReadHead()
+model_controller = ControllerFeedforward()
+params = []
+params.extend(model_write.params)
+params.extend(model_controller.params)
+params.extend(model_read.params)
+
+count = 0
+for p in params:
+    shape = p.get_value().shape
+    if len(shape) == 0:
+        count += 1
+    else:
+        count += reduce(operator.mul, shape)
+
+print count
 
 
 

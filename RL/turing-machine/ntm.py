@@ -3,7 +3,7 @@ import theano
 import theano.tensor as T
 import numpy
 from head import *
-from controller import *
+from controller_feedforward import *
 import scipy
 
 

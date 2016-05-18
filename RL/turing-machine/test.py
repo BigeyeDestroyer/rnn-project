@@ -2,134 +2,67 @@ import theano
 import theano.tensor as T
 import numpy
 from head import *
-from controller import *
+from controller_feedforward import *
+from controller_lstm import *
 from common.utils import *
 import scipy
 import operator
 
-
-""" Test controller
+""" Test the controller
+"""
+batch_size = 5
 input_size = 8
 output_size = 8
 mem_size = 128
 mem_width = 20
-layer_sizes = [100]
+layer_sizes = [100, 150]
+num_heads = 3
 
-X = T.matrix('X')  # with size (batch, input_size)
-read_input = T.matrix('read_input')  # with size (batch, mem_width)
+model = ControllerLSTM(layer_sizes=layer_sizes)
 
-model = ControllerFeedforward()
-fin_hidden, output = model.step_controller(X, read_input)
+x_t = T.matrix('x_t')
+read_tm1_list = [T.matrix('read_tm1_%d' % h) for h in xrange(num_heads)]
+c_tm1_list = [T.matrix('c_tm1_%d' % l) for l in xrange(len(layer_sizes))]
+h_tm1_list = [T.matrix('h_tm1_%d' % l) for l in xrange(len(layer_sizes))]
 
-fn_step_controller = theano.function(inputs=[X, read_input],
-                                     outputs=[fin_hidden, output])
+inputs = [x_t]
+inputs.extend(read_tm1_list)
+inputs.extend(c_tm1_list)
+inputs.extend(h_tm1_list)
 
-data = numpy.random.randn(5, input_size)
-data_read = numpy.random.randn(5, mem_width)
+c_t_list, h_t_list = model.step(x_t, read_tm1_list, c_tm1_list, h_tm1_list)
 
-fin_out, out = fn_step_controller(data, data_read)
-print type(fin_out)
-print fin_out.shape
+outputs = []
+outputs.extend(c_t_list)
+outputs.extend(h_t_list)
 
-print type(out)
-print out.shape
-"""
+fn_lstm = theano.function(inputs=inputs,
+                          outputs=outputs)
 
-"""
-# Test readhead
-batch_size = 5
-number = 0
-input_size = 100
-mem_size = 128
-mem_width = 20
-shift_width = 3
-x_t = T.matrix('x_t')  # with size (batch, input_size)
-w_tm1 = T.matrix('w_tm1')  # with size (batch, mem_size)
-M_t = T.matrix('M_t')  # with size (mem_size, mem_width)
+data_x = numpy.random.randn(batch_size, input_size).astype(dtype=theano.config.floatX)
+read_list = [numpy.random.randn(batch_size, mem_width).astype(dtype=theano.config.floatX) for h in range(num_heads)]
+c_list = [numpy.random.randn(batch_size, layer_sizes[l]).astype(dtype=theano.config.floatX) for l in range(len(layer_sizes))]
+h_list = [numpy.random.randn(batch_size, layer_sizes[l]).astype(dtype=theano.config.floatX) for l in range(len(layer_sizes))]
 
-model = WriteHead()
-w_t, erase_t, add_t = model.step(x_t, w_tm1, M_t)
-fn_out = theano.function(inputs=[x_t, w_tm1, M_t],
-                         outputs=[w_t, erase_t, add_t])
-
-data_x = numpy.random.randn(batch_size, input_size)
-data_w = numpy.random.rand(batch_size, mem_size)
-data_w = numpy.exp(data_w) / numpy.reshape(numpy.sum(numpy.exp(data_w), axis=1), (batch_size, 1))
-data_M = numpy.random.randn(mem_size, mem_width)
-
-output, out_erase, out_add = fn_out(data_x, data_w, data_M)
-
-print type(output)
-print output.shape
-print numpy.sum(output, axis=1)
-
-print type(out_erase)
-print out_erase.shape
-
-print type(out_add)
-print out_add.shape
-"""
-
-"""
-number = 0
-input_size = 100
-mem_size = 128
-mem_width = 20
-shift_width = 3
-X = T.matrix('X')
-model = WriteHead()
-key, beta, g, shift, gamma, erase, add = model.step_writehead(X)
-fn_step_write = theano.function(inputs=[X],
-                                outputs=[key, beta, g, shift, gamma, erase, add])
-
-data = numpy.random.randn(5, input_size)
-key_data, beta_data, g_data, shift_data, \
-gamma_data, erase_data, add_data = fn_step_write(data)
-
-print type(key_data)
-print key_data.shape
-
-print type(beta_data)
-print beta_data.shape
-
-print type(g_data)
-print g_data.shape
-
-print type(shift_data)
-print shift_data.shape
-
-print type(gamma_data)
-print gamma_data.shape
-
-print type(erase_data)
-print erase_data.shape
-
-print type(add_data)
-print add_data.shape
-"""
-
-model_write = WriteHead()
-model_read = ReadHead()
-model_controller = ControllerFeedforward()
-params = []
-params.extend(model_write.params)
-params.extend(model_controller.params)
-params.extend(model_read.params)
-
-count = 0
-for p in params:
-    shape = p.get_value().shape
-    if len(shape) == 0:
-        count += 1
-    else:
-        count += reduce(operator.mul, shape)
-
-print count
+data_in = [data_x] + read_list + c_list + h_list
 
 
+data_out = fn_lstm(data_in[0], data_in[1], data_in[2], data_in[3], data_in[4], data_in[5], data_in[6], data_in[7])  # error occurs here, we should break list data_in
 
+print type(data_out)
+print len(data_out)
 
+print type(data_out[0])
+print data_out[0].shape
 
+print type(data_out[1])
+print data_out[1].shape
+
+print type(data_out[2])
+print data_out[2].shape
+
+print type(data_out[3])
+print data_out[3].shape
 
 
 

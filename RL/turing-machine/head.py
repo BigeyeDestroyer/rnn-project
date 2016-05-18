@@ -24,12 +24,12 @@ def cosine_sim(k, M):
 
 # In this version, read heads and write heads are independent
 class Head(object):
-    def __init__(self, number=0, last_dim=100, mem_size=128,
+    def __init__(self, idx=0, last_dim=100, mem_size=128,
                  mem_width=20, shift_width=3, similarity=cosine_sim,
                  is_write=True):
         """
-        :type number: int
-        :param number: the layer number
+        :type idx: int
+        :param idx: the layer number
 
         :type last_dim: int
         :param last_dim: dim of the controller's last layer
@@ -56,9 +56,9 @@ class Head(object):
         self.similarity = similarity
         self.is_write = is_write
         if self.is_write:
-            self.suffix = 'write' + str(number)
+            self.suffix = 'write' + str(idx)
         else:
-            self.suffix = 'read' + str(number)
+            self.suffix = 'read' + str(idx)
 
         # Initialize the params
         # 1. Content Addressing
@@ -99,13 +99,13 @@ class Head(object):
         if is_write:
             # 5. Erase and Add vector
             self.W_erase = init_weights(shape=(self.last_dim, self.mem_width),
-                                        name='W_erase_write%d' % number)
+                                        name='W_erase_' + self.suffix)
             self.b_erase = init_bias(size=self.mem_width,
-                                     name='b_erase_write%d' % number)
+                                     name='b_erase_' + self.suffix)
             self.W_add = init_weights(shape=(self.last_dim, self.mem_width),
-                                      name='W_add_write%d' % number)
+                                      name='W_add_' + self.suffix)
             self.b_add = init_bias(size=self.mem_width,
-                                   name='b_add_write%d' % number)
+                                   name='b_add_' + self.suffix)
             self.params.extend([self.W_erase, self.b_erase,
                                 self.W_add, self.b_add])
 

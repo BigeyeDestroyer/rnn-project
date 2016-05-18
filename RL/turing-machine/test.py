@@ -67,7 +67,7 @@ print data_out[3].shape
 
 
 
-""" Test head
+""" Test read head
 batch_size = 5
 number = 0
 last_dim = 100
@@ -101,4 +101,5 @@ print w_out.shape
 
 print type(read_out)
 print read_out.shape
+
 """

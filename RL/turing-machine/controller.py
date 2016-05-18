@@ -56,10 +56,10 @@ class ControllerFeedforward(object):
         self.W_read_hidden = glorot_uniform(shape=(mem_width, layer_sizes[0]), name='W_hidden_read')
         self.params.append(self.W_read_hidden)
 
-    def step(self, X, read_input):
+    def step(self, x_t, read_input):
         """
-        :type X: theano tensor, with size (batch, input_size)
-        :param X: input from outside environment at one time step
+        :type x_t: theano tensor, with size (batch, input_size)
+        :param x_t: input from outside environment at one time step
 
         :type read_input: theano tensor, with size (batch, mem_width)
         :param read_input: input from memory matrix at one time step
@@ -68,7 +68,7 @@ class ControllerFeedforward(object):
         for i in range(len(self.layer_sizes)):
             if i == 0:
                 # activations[0] with size (batch, layer_size[0])
-                activations.append(T.tanh(T.dot(X, self.layers[i][0]) +
+                activations.append(T.tanh(T.dot(x_t, self.layers[i][0]) +
                                           T.dot(read_input, self.W_read_hidden) +
                                           self.layers[i][1]))
             else:  # i = 1, 2, ..., len(layer_sizes) - 1

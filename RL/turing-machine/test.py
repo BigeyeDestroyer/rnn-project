@@ -5,6 +5,7 @@ from head import *
 from controller_feedforward import *
 from controller_lstm import *
 from common.utils import *
+from memory import *
 import scipy
 import operator
 
@@ -67,7 +68,7 @@ print data_out[3].shape
 
 
 
-
+""" Test head
 batch_size = 5
 number = 0
 last_dim = 100
@@ -101,5 +102,57 @@ print w_out.shape
 
 print type(read_out)
 print read_out.shape
+"""
 
+""" Test memory
+"""
 
+batch_size = 5
+num_read_heads = 2
+num_write_heads = 1
+mem_size = 128
+mem_width = 20
+layer_sizes = [100]
+
+""" All the inputs
+"""
+M_tm1 = T.tensor3('M_tm1')  # with size (batch_size, mem_size, mem_width)
+# list of tensor variables, each with size (batch_size, mem_size)
+w_read_tm1_list = [T.matrix('w_read_tm1_%d' % h)
+                   for h in range(num_read_heads)]
+# list of tensor variables, each with size (batch_size, mem_size)
+w_write_tm1_list = [T.matrix('w_write_tm1_%d' % h)
+                    for h in range(num_write_heads)]
+last_hidden = T.matrix('last_hidden')  # with size (batch_size, last_dim)
+""" All the inputs
+"""
+model = Memory(batch_size=batch_size, num_read_heads=num_read_heads,
+               num_write_heads=num_write_heads, layer_sizes=layer_sizes)
+
+M_t, w_read_t_list, \
+w_write_t_list, read_t_list = model.step(M_tm1, w_read_tm1_list,
+                                         w_write_tm1_list, last_hidden)
+inputs = [M_tm1] + w_read_tm1_list + w_write_tm1_list + [last_hidden]
+outputs = [M_t] + w_read_t_list + w_write_t_list + read_t_list
+
+fn_test = theano.function(inputs=inputs,
+                          outputs=outputs)
+
+M_data = numpy.random.randn(batch_size, mem_size, mem_width)
+w_read1 = numpy.random.randn(batch_size, mem_size)
+w_read2 = numpy.random.randn(batch_size, mem_size)
+w_write1 = numpy.random.randn(batch_size, mem_size)
+last_data = numpy.random.randn(batch_size, layer_sizes[-1])
+
+M_out, w_read1_out, w_read2_out, \
+w_write1_out, read1_out, read2_out = fn_test(M_data, w_read1,
+                                             w_read2, w_write1,
+                                             last_data)
+print type(M_out)
+print M_out.shape
+
+print w_read1_out.shape
+
+print w_write1_out.shape
+
+print read2_out.shape

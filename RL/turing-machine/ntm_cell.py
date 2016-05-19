@@ -4,7 +4,7 @@ from memory import *
 class NTMCell(object):
     def __init__(self, input_dim=8, output_dim=8, mem_size=128,
                  mem_width=20, layer_sizes=[100], num_reads=1,
-                 batch_size=5, num_writes=1, shift_width=3, eps=1e-12):
+                 batch_size=1, num_writes=1, shift_width=3, eps=1e-12):
 
         # params for controller
         self.input_dim = input_dim

@@ -211,6 +211,30 @@ print h_out.shape
 
 
 
+def parameter_count(self):
+        import operator
+        params = self.__dict__['params']
+        count = 0
+        for p in params.values():
+            shape = p.get_value().shape
+            if len(shape) == 0:
+                count += 1
+            else:
+                count += reduce(operator.mul, shape)
+        return count
+
+import operator
+model = NTMCell()
+params = model.params
+count = 0
+for p in params:
+    shape = p.get_value().shape
+    if len(shape) == 0:
+        count += 1
+    else:
+        count += reduce(operator.mul, shape)
+print count
+
 
 
 

@@ -4,22 +4,31 @@ import numpy
 from common.utils import *
 import scipy
 
-def cosine_sim(k, M):
+
+def cosine_sim(k, M, batch_size):
     """
     :type k: tensor variable with size (batch_size, mem_width)
     :param k: input to calculate similarity
 
-    :type M: tensor variable with size (mem_size, mem_width)
+    :type M: tensor variable with size (batch_size, mem_size, mem_width)
     :param M: memory matrix
+
+    :type batch_size: int
+    :param batch_size: used to iterate for each sample
 
     :return: similarity measure with size (batch_size, mem_size)
     """
     k_lengths = T.sqrt(T.sum(k ** 2, axis=1)).dimshuffle((0, 'x'))
     k_unit = k / (k_lengths + 1e-5)
 
-    M_lengths = T.sqrt(T.sum(M ** 2, axis=1)).dimshuffle((0, 'x'))
-    M_unit = M / (M_lengths + 1e-5)
-    return T.dot(k_unit, T.transpose(M_unit))
+    M_lengths = T.sqrt(T.sum(M ** 2, axis=2)).dimshuffle((0, 1, 'x'))  # with size (batch_size, mem_size, 1)
+    M_unit = M / (M_lengths + 1e-5)  # with size (batch_size, mem_size, mem_width)
+
+    list_sim = []
+    for idx in range(batch_size):
+        list_sim.append(T.dot(k_unit[idx, :],
+                              T.transpose(M_unit[idx, :, :])).dimshuffle('x', 0))
+    return T.concatenate(tensor_list=list_sim, axis=0)
 
 
 # In this version, read heads and write heads are independent
@@ -109,13 +118,13 @@ class Head(object):
             self.params.extend([self.W_erase, self.b_erase,
                                 self.W_add, self.b_add])
 
-    def step(self, M_tm1, w_tm1, last_hidden):
+    def step(self, M_tm1, w_tm1, last_hidden, batch_size):
         """
         This function computes one step of the head
 
         Parameters
         ----------
-        :type M_tm1: tensor variable with size (mem_size, mem_width) at time t - 1
+        :type M_tm1: tensor variable with size (batch_size, mem_size, mem_width) at time t - 1
         :param M_tm1: memory matrix at time t - 1
 
         :type w_tm1: tensor variable with size (batch_size, mem_size)
@@ -124,6 +133,9 @@ class Head(object):
         :type last_hidden: tensor variable with size (batch, last_dim) at time t
         :param last_hidden: last hidden layer of controller, last_dim is the
                             hidden size of the LSTM's top layer
+
+        :type batch_size: int
+        :param batch_size: used in the similarity computation
 
         :returns
 
@@ -175,7 +187,7 @@ class Head(object):
         #        dimshuffle makes it with size (batch, 1)
         # Thus, the multi will broadcast along dim1 of similarity
         w_c_t = T.nnet.softmax(beta_t.dimshuffle(0, 'x') *
-                               self.similarity(key_t, M_tm1))
+                               self.similarity(key_t, M_tm1, batch_size))
 
         """ 2. Interpolation: w_g_t, with size (batch, mem_size)
         """
@@ -232,5 +244,11 @@ class Head(object):
             return w_t, erase_t, add_t
         else:
             # read_t : (batch, mem_width)
-            read_t = T.dot(w_t, M_tm1)
+            read_batch = []
+            # each multi betweem (mem_size, ) (mem_size, mem_width)
+            # w_t with size (batch_size, mem_size)
+            # M_tm1 with size (batch_size, mem_size, mem_width)
+            for idx in xrange(batch_size):
+                read_batch.append(T.dot(w_t[idx, :], M_tm1[idx, :, :]).dimshuffle('x', 0))
+            read_t = T.concatenate(tensor_list=read_batch, axis=0)
             return w_t, read_t

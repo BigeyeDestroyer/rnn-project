@@ -67,7 +67,7 @@ print data_out[3].shape
 
 
 
-""" Test read head
+
 batch_size = 5
 number = 0
 last_dim = 100
@@ -80,17 +80,17 @@ is_write = False
 
 model = Head(is_write=is_write)
 
-M_tm1 = T.matrix('M_tm1')  # with size (mem_size, mem_width)
+M_tm1 = T.tensor3('M_tm1')  # with size (mem_size, mem_width)
 w_tm1 = T.matrix('w_tm1')  # with size (batch_size, mem_size)
 last_hidden = T.matrix('last_hidden')  # with size (batch, last_dim)
 
 w_t, read_t = model.step(M_tm1=M_tm1, w_tm1=w_tm1,
-                                 last_hidden=last_hidden)
+                         last_hidden=last_hidden, batch_size=batch_size)
 
 fn_head = theano.function(inputs=[M_tm1, w_tm1, last_hidden],
                           outputs=[w_t, read_t])
 
-M_in = numpy.random.randn(mem_size, mem_width)
+M_in = numpy.random.randn(batch_size, mem_size, mem_width)
 w_in = numpy.random.randn(batch_size, mem_size)
 last_in = numpy.random.randn(batch_size, last_dim)
 
@@ -102,4 +102,4 @@ print w_out.shape
 print type(read_out)
 print read_out.shape
 
-"""
+

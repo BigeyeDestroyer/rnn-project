@@ -4,7 +4,7 @@ import numpy as np
 import tensorflow as tf
 from random import randint
 
-from ntm import NTM
+from ntm_cell import NTM
 from utils import pprint
 from ntm_cell import NTMCell
 

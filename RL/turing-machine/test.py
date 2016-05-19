@@ -2,8 +2,7 @@ import theano
 import theano.tensor as T
 import numpy
 from head import *
-from controller_feedforward import *
-from controller_lstm import *
+from controller import *
 from common.utils import *
 from memory import *
 from ntm_cell import *
@@ -160,7 +159,7 @@ print read2_out.shape
 
 
 """ Test the NTMCell class
-"""
+
 eps = 1e-12
 input_dim = 8
 output_dim = 8
@@ -175,8 +174,7 @@ shift_width = 3
 # Below are the body of the step function
 
 
-""" state contains: M_tm1, w_read_tm1_list, w_write_tm1_list
-                    read_tm1_list, c_tm1_list, h_tm1_list
+"""
 """
 x_t = T.matrix('x_tm1')  # current input, (batch, input_size)
 
@@ -209,7 +207,7 @@ print w_write_out.shape
 print read_out.shape
 print c_out.shape
 print h_out.shape
-
+"""
 
 
 

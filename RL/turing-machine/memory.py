@@ -1,5 +1,5 @@
 from head import *
-from controller_lstm import *
+from controller import *
 
 
 class Memory(object):

@@ -84,10 +84,10 @@ def Linear(input_, output_size, stddev=0.5,
         is_vector = False
         if len(shape) == 1:
             is_vector = True
-            input_ = tf.reshape(input_, [1, -1])
+            input_ = tf.reshape(input_, [1, -1]) # cast to row vector
             input_size = shape[0]
         elif len(shape) == 2:
-            input_size = shape[1]
+            input_size = shape[1]  # first dim may be the batch_size
         else:
             raise ValueError("Linear expects shape[1] of inputuments: %s" % str(shape))
 

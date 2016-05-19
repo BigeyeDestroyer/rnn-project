@@ -159,8 +159,9 @@ print read2_out.shape
 """
 
 
-""" Test
+""" Test the NTMCell class
 """
+eps = 1e-12
 input_dim = 8
 output_dim = 8
 mem_size = 128
@@ -178,37 +179,29 @@ shift_width = 3
                     read_tm1_list, c_tm1_list, h_tm1_list
 """
 x_t = T.matrix('x_tm1')  # current input, (batch, input_size)
-M_tm1 = T.tensor3('M_tm1')  # previous memory, (mem_size, mem_width)
-# previous read weight, a list of (batch, mem_size) array
-w_read_tm1_list = [T.matrix('w_read_tm1' + str(h)) for h in range(num_reads)]
-# previous write weight, a list of (batch, mem_size) array
-w_write_tm1_list = [T.matrix('w_write_tm1' + str(h)) for h in range(num_writes)]
-read_tm1_list = [T.matrix('read_tm1' + str(h)) for h in range(num_reads)]
-c_tm1_list = [T.matrix('c_tm1_%d' % l) for l in xrange(len(layer_sizes))]
-h_tm1_list = [T.matrix('h_tm1_%d' % l) for l in xrange(len(layer_sizes))]
 
-# test
-inputs = [x_t] + [M_tm1] + w_read_tm1_list + w_write_tm1_list + \
-         read_tm1_list + c_tm1_list + h_tm1_list
+
+
 model = NTMCell()
-M_t, w_read_t_list, w_write_t_list, read_t_list, c_t_list, h_t_list = \
-    model.step(x_t, M_tm1, w_read_tm1_list, w_write_tm1_list, read_tm1_list, c_tm1_list, h_tm1_list)
+output_t, state = model.step(x_t)
+M_t = state['M']
+w_read_t_list = state['w_read']
+w_write_t_list = state['w_write']
+read_t_list = state['read']
+c_t_list = state['c']
+h_t_list = state['h']
+
 outputs = [M_t] + w_read_t_list + w_write_t_list + \
           read_t_list + c_t_list + h_t_list
 
-fn_test = theano.function(inputs=inputs,
+fn_test = theano.function(inputs=[x_t],
                           outputs=outputs)
 
 x_data = numpy.random.randn(batch_size, input_dim)
-M_data = numpy.random.randn(batch_size, mem_size, mem_width)
-w_read_data = numpy.random.randn(batch_size, mem_size)
-w_write_data = numpy.random.randn(batch_size, mem_size)
-read_data = numpy.random.randn(batch_size, mem_width)
-c_data = numpy.random.randn(batch_size, layer_sizes[-1])
-h_data = numpy.random.randn(batch_size, layer_sizes[-1])
+
 
 M_out, w_read_out, w_write_out, read_out, c_out, h_out = \
-    fn_test(x_data, M_data, w_read_data, w_write_data, read_data, c_data, h_data)
+    fn_test(x_data)
 
 print M_out.shape
 print w_read_out.shape
@@ -216,3 +209,15 @@ print w_write_out.shape
 print read_out.shape
 print c_out.shape
 print h_out.shape
+
+
+
+
+
+
+
+
+
+
+
+

@@ -22,17 +22,20 @@ class Memory(object):
         self.num_read_heads = num_read_heads
         self.num_write_heads = num_write_heads
         self.layer_sizes = layer_sizes
+        self.params = []
 
         # 1. Build all the read heads and write heads
         self.read_heads = []  # read_heads, list of read heads
         for idx in xrange(self.num_read_heads):
             self.read_heads.append(Head(idx=idx, last_dim=self.layer_sizes[-1],
                                         is_write=False))
+            self.params.extend(self.read_heads[-1].params)
 
         self.write_heads = []  # write_heads, list of write heads
         for idx in xrange(self.num_write_heads):
             self.write_heads.append(Head(idx=idx, last_dim=self.layer_sizes[-1],
                                          is_write=True))
+            self.params.extend(self.write_heads[-1].params)
 
     def step(self, M_tm1, w_read_tm1_list, w_write_tm1_list, last_hidden):
         """

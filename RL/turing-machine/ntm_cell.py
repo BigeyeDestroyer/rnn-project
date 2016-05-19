@@ -20,6 +20,9 @@ class NTMCell(object):
         self.shift_width = shift_width
         self.eps = eps
 
+        self.depth = 0  # to store the states along time steps
+        self.states = []
+
         # initial the params
         self.params = []
         self.controller = ControllerLSTM(input_size=self.input_dim, output_size=self.output_dim,
@@ -38,6 +41,8 @@ class NTMCell(object):
 
         if state is None:
             state = self.initial_state()
+            self.depth += 1
+            self.states.append(state)
 
         M_tm1 = state['M']
         w_read_tm1_list = state['w_read']
@@ -67,6 +72,10 @@ class NTMCell(object):
             'c': c_t_list,
             'h': h_t_list
         }
+
+        self.depth += 1
+        self.states.append(state)
+
         return output_t, state
 
     def initial_state(self, dummy_value=0.0):
@@ -115,6 +124,27 @@ class NTMCell(object):
             'h': h_init_list
         }
         return state
+
+    # M: D tensor with size (batch_size, mem_size, mem_width)
+    def get_memory(self, depth=None):
+        depth = depth if depth else self.depth
+        return self.states[depth - 1]['M']
+
+    # w_read: a list of 2D tensors, each with size (batch_size, mem_size)
+    def get_read_weights(self, depth=None):
+        depth = depth if depth else self.depth
+        return self.states[depth - 1]['w_read']
+
+    # w_write: a list of 2D tensors, each with size (batch_size, mem_size)
+    def get_write_weights(self, depth=None):
+        depth = depth if depth else self.depth
+        return self.states[depth - 1]['w_write']
+
+    # read: a list of 2D tensors, each with size (batch_size, mem_width)
+    def get_read_vectors(self, depth=None):
+        depth = depth if depth else self.depth
+        return self.states[depth - 1]['read']
+
 
 
 

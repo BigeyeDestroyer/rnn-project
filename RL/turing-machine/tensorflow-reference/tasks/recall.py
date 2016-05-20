@@ -1,12 +1,13 @@
 import os
 import time
-import numpy as np
-import tensorflow as tf
 from random import randint
 
-from ntm_cell import NTM
+import numpy as np
+import tensorflow as tf
 from utils import pprint
-from ntm_cell import NTMCell
+
+from layers.ntm_cell import NTM
+from layers.ntm_cell import NTMCell
 
 print_interval = 5
 

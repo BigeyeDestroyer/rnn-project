@@ -2,17 +2,17 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
+from collections import defaultdict
+
 import numpy as np
 import tensorflow as tf
-from collections import defaultdict
-from tensorflow.python.ops import array_ops
-from tensorflow.python.ops.seq2seq import sequence_loss
-
-import ntm_cell
-
-import os
 from ops import binary_cross_entropy_with_logits
+from tensorflow.python.ops.seq2seq import sequence_loss
 from utils import progress
+
+from layers import ntm_cell
+
 
 class NTM(object):
     def __init__(self, cell, sess,

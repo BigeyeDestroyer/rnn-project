@@ -1,5 +1,5 @@
 from memory import *
-
+from controller import *
 
 class NTMCell(object):
     def __init__(self, input_dim=8, output_dim=8, mem_size=128,

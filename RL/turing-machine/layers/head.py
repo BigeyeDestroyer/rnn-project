@@ -1,4 +1,6 @@
 import theano.tensor as T
+import sys
+sys.path.append('..')
 from common.utils import *
 import scipy
 

@@ -1,15 +1,5 @@
 import numpy
 
-""" From tensor flow
-length = 20
-bits = 6
-seq = numpy.zeros([length, bits + 2], dtype=numpy.float32)
-for idx in xrange(length):
-    seq[idx, 2: bits + 2] = numpy.random.rand(bits).round()
-
-output = list(seq)
-"""
-
 
 def generate_copy_sequences(input_size_orig, sequence_length, batch_size):
     """

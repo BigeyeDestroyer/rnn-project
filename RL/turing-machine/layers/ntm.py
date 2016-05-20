@@ -1,6 +1,8 @@
+import h5py
+import sys
+sys.path.append('..')
 from ntm_cell import *
 from optimizers.optimizers import *
-import h5py
 
 
 class NTM(object):

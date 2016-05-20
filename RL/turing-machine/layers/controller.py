@@ -1,6 +1,6 @@
-import theano
 import theano.tensor as T
-import numpy
+import sys
+sys.path.append('..')
 from common.utils import *
 
 

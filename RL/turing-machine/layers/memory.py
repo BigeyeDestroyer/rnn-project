@@ -1,5 +1,4 @@
 from head import *
-from controller import *
 
 
 class Memory(object):

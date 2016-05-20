@@ -1,19 +1,7 @@
-import theano
-import theano.tensor as T
-import numpy
-from head import *
-from controller import *
-from common.utils import *
-from memory import *
-from ntm_cell import *
-import scipy
-import operator
-from copy_task import *
 import time
-from ntm import *
 
-
-
+from copy_task import *
+from layers.ntm import *
 
 """
 batch_size = 5

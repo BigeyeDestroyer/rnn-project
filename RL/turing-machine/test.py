@@ -8,6 +8,7 @@ from memory import *
 from ntm_cell import *
 import scipy
 import operator
+from copy_task import *
 
 
 """ Test controller
@@ -210,7 +211,7 @@ print h_out.shape
 """
 
 
-
+""" count params
 def parameter_count(self):
         import operator
         params = self.__dict__['params']
@@ -234,6 +235,8 @@ for p in params:
     else:
         count += reduce(operator.mul, shape)
 print count
+"""
+
 
 
 

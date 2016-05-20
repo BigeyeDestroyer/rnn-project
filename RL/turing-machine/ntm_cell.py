@@ -37,12 +37,18 @@ class NTMCell(object):
         self.params.extend(self.memory.params)
         self.params.extend([self.W_output, self.b_output])
 
-    def step(self, x_t, state=None):
+    def step(self, x_t):
+        """
+        :type x_t: tensor variable with size (batch_size, input_dim)
+        :param x_t: input at time step t
+        """
 
-        if state is None:
+        if self.depth == 0:  # which means we need initialization
             state = self.initial_state()
             self.depth += 1
             self.states.append(state)
+        else:
+            state = self.states[-1]
 
         M_tm1 = state['M']
         w_read_tm1_list = state['w_read']
@@ -76,7 +82,7 @@ class NTMCell(object):
         self.depth += 1
         self.states.append(state)
 
-        return output_t, state
+        return output_t
 
     def initial_state(self, dummy_value=0.0):
         # Initial memory, with size (mem_size, mem_width)

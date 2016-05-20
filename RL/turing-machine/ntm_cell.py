@@ -122,13 +122,39 @@ class NTMCell(object):
             c_init_list.append(c_init)
             h_init_list.append(h_init)
 
+        """ After initialization, compute for two steps
+            so that when taking grads, all the weights
+            are in theano graph at each time step
+        """
+        # First step
+        x_t = T.nnet.sigmoid(T.alloc(floatX(dummy_value),
+                                     self.batch_size, self.input_dim))
+        c_t_list, h_t_list = self.controller.step(x_t, read_init_list,
+                                                  c_init_list, h_init_list)
+
+        last_hidden = h_t_list[-1]  # with size (batch_size, layer_sizes[-1])
+
+        M_t, w_read_t_list, w_write_t_list, read_t_list = \
+            self.memory.step(M_init, w_read_init_list, w_write_init_list, last_hidden)
+
+        # Second step
+        x_tplus = T.nnet.sigmoid(T.alloc(floatX(dummy_value),
+                                         self.batch_size, self.input_dim))
+        c_tplus_list, h_tplus_list = self.controller.step(x_tplus, read_t_list,
+                                                          c_t_list, h_t_list)
+
+        last_hidden = h_tplus_list[-1]  # with size (batch_size, layer_sizes[-1])
+
+        M_tplus, w_read_tplus_list, w_write_tplus_list, read_tplus_list = \
+            self.memory.step(M_t, w_read_t_list, w_write_t_list, last_hidden)
+
         state = {
-            'M': M_init,
-            'w_read': w_read_init_list,
-            'w_write': w_write_init_list,
-            'read': read_init_list,
-            'c': c_init_list,
-            'h': h_init_list
+            'M': M_tplus,
+            'w_read': w_read_tplus_list,
+            'w_write': w_write_tplus_list,
+            'read': read_tplus_list,
+            'c': c_tplus_list,
+            'h': h_tplus_list
         }
         return state
 

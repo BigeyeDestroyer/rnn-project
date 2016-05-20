@@ -9,6 +9,10 @@ from ntm_cell import *
 import scipy
 import operator
 from copy_task import *
+import time
+from ntm import *
+
+
 
 
 """
@@ -193,7 +197,7 @@ print read2_out.shape
 
 
 
-
+""" Test NTMCell
 eps = 1e-12
 input_dim = 8
 output_dim = 8
@@ -209,21 +213,57 @@ shift_width = 3
 
 
 x_t = T.matrix('x_tm1')  # current input, (batch, input_size)
-
+M_target = T.tensor3('M_target')  # with size (batch_size, mem_size, mem_width)
+out_target = T.matrix('out_target')  # with size (batch_size, layer_sizes[-1])
 
 model = NTMCell(input_dim=input_dim, output_dim=output_dim,
                 mem_size=mem_size, mem_width=mem_width,
                 layer_sizes=layer_sizes, num_reads=num_reads,
                 batch_size=batch_size, num_writes=num_writes,
                 shift_width=shift_width)
-output_t = model.step(x_t)
-output_target = T.matrix('output_target')
-cost = T.mean((output_t - output_target) ** 2)
+
+state = model.initial_state(0.)
+
+M_tm1 = state['M']
+w_read_tm1_list = state['w_read']
+w_write_tm1_list = state['w_write']
+read_tm1_list = state['read']
+c_tm1_list = state['c']
+h_tm1_list = state['h']
+
+c_t_list, h_t_list = model.controller.step(x_t, read_tm1_list,
+                                           c_tm1_list, h_tm1_list)
+
+last_hidden = h_t_list[-1]  # with size (batch_size, layer_sizes[-1])
+
+M_t, w_read_t_list, w_write_t_list, read_t_list = \
+    model.memory.step(M_tm1, w_read_tm1_list, w_write_tm1_list, last_hidden)
+
+state = {
+    'M': M_t,
+    'w_read': w_read_t_list,
+    'w_write': w_write_t_list,
+    'read': read_t_list,
+    'c': c_t_list,
+    'h': h_t_list
+}
+
+c_tplus_list, h_tplus_list = \
+    model.controller.step(x_t, read_t_list, c_t_list, h_t_list)
+
+last_hidden = h_tplus_list[-1]  # with size (batch_size, layer_sizes[-1])
+
+M_tplus, w_read_tplus_list, w_write_tplus_list, read_tplus_list = \
+    model.memory.step(M_tm1, w_read_tm1_list, w_write_tm1_list, last_hidden)
+
+# cost = T.mean((M_tplus - M_target) ** 2)
+
+cost = T.mean((last_hidden - out_target) ** 2)
 
 params = []
 for idx in range(num_writes):
-    params.append(model.memory.write_heads[idx].W_gamma)
-
+    params.append(model.memory.write_heads[idx].W_key)
+#params = model.params
 gparams = []
 for param in params:
     gparams.append(T.grad(cost, param))
@@ -233,23 +273,17 @@ for p, gp in zip(params, gparams):
     updates.append((p, p - 0.1 * gp))
 
 
-#w_read_t_list = state['w_read']
-#w_write_t_list = state['w_write']
-#read_t_list = state['read']
-#c_t_list = state['c']
-#h_t_list = state['h']
-
-
 fn_test = theano.function(inputs=[x_t],
-                          outputs=output_t)
-fn_train = theano.function(inputs=[x_t, output_target],
-                           outputs=cost)
+                          outputs=M_tplus)
+fn_train = theano.function(inputs=[x_t, out_target],
+                           outputs=cost, updates=updates)
 
 x_data = numpy.random.randn(batch_size, input_dim)
-out_target = numpy.random.randn(batch_size, output_dim)
+M_out = numpy.random.randn(batch_size, mem_size, mem_width)
+last_out = numpy.random.randn(batch_size, layer_sizes[-1])
 
 out_data = fn_test(x_data)
-cost_out = fn_train(x_data, out_target)
+cost_out = fn_train(x_data, last_out)
 
 print type(out_data)
 print out_data.shape
@@ -263,7 +297,7 @@ print cost_out
 #print read_out.shape
 #print c_out.shape
 #print h_out.shape
-
+"""
 
 
 """ count params
@@ -293,11 +327,39 @@ print count
 """
 
 
+""" Test the NTM class
+"""
+input_dim = 8
+output_dim = 8
+mem_size = 128
+mem_width = 20
+layer_sizes = [100]
+num_reads = 1
+batch_size = 16
+num_writes = 1
+shift_width = 3
+eps = 1e-12
 
+start_time = time.time()
+model = NTM()
 
+"""
+fn_test = theano.function(inputs=[model.X, model.Y, model.lr],
+                          outputs=model.train(model.Y, model.Y))
+"""
 
+sequence_length = 20
+input_sequences, output_sequences = \
+    generate_copy_sequences(input_size_orig=input_dim,
+                            sequence_length=sequence_length,
+                            batch_size=batch_size)
+end_time = time.time()
 
+out_data = model.pred(input_sequences)
+out_cost = model.train(input_sequences, output_sequences, 0.1)
 
-
-
-
+print input_sequences.shape
+print output_sequences.shape
+print type(out_data)
+print out_data
+print('Compiling took %.1fs' % (end_time - start_time))

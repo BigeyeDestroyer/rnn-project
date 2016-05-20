@@ -1,6 +1,7 @@
 from copy_task import *
 from ntm_cell import *
-import theano
+from optimizers.optimizers import *
+import time
 
 
 class NTM(object):
@@ -80,7 +81,6 @@ class NTM(object):
                             self.min_grad, self.max_grad)
             gparams.append(gparam)
 
-
         # eval(): string to function
         optimizer = eval(self.optimizer)
         updates = optimizer(self.cell.params, gparams, self.lr)
@@ -91,40 +91,14 @@ class NTM(object):
                                     outputs=self.outputs)
 
 
+    
 
 
 
 
 
-input_dim = 8
-output_dim = 8
-mem_size = 128
-mem_width = 20
-layer_sizes = [100]
-num_reads = 1
-batch_size = 16
-num_writes = 1
-shift_width = 3
-eps = 1e-12
 
-model = NTM()
 
-"""
-fn_test = theano.function(inputs=[model.X, model.Y, model.lr],
-                          outputs=model.train(model.Y, model.Y))
-"""
-
-sequence_length = 20
-input_sequences, output_sequences = \
-    generate_copy_sequences(input_size_orig=input_dim,
-                            sequence_length=sequence_length,
-                            batch_size=batch_size)
-out_data = model.pred(input_sequences)
-
-print input_sequences.shape
-print output_sequences.shape
-print type(out_data)
-print out_data
 
 
 

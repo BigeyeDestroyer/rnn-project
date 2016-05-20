@@ -30,6 +30,9 @@ This is a repository for rnn-related papers and techniques.
 # keep up with trends
 1. [keep with new trends][9]
 2. [future of AI from LeCun][10]
+3. Large-Scale Deep Learning for Intelligent Computing Systems
+	- From **Jeff Dean**
+	- [slides][11] and [video][12]
 
 
 [1]:	https://www.quora.com/How-does-LSTM-help-prevent-the-vanishing-and-exploding-gradient-problem-in-a-recurrent-neural-network
@@ -42,3 +45,5 @@ This is a repository for rnn-related papers and techniques.
 [8]:	http://www.aaai.org/Conferences/AAAI/aaai16.php
 [9]:	http://handong1587.github.io/deep_learning/2016/04/01/keep-up-with-new-trends.html
 [10]:	http://mp.weixin.qq.com/s?__biz=MzI3MTA0MTk1MA==&mid=403182818&idx=1&sn=7d4a8f11e61573183c1797addaacf937&scene=0#wechat_redirect
+[11]:	http://www.slideshare.net/hustwj/cikm-keynotenov2014
+[12]:	https://www.youtube.com/watch?v=4hqb3tdk01k

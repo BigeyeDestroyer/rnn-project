@@ -1,7 +1,6 @@
-from copy_task import *
 from ntm_cell import *
 from optimizers.optimizers import *
-import time
+import h5py
 
 
 class NTM(object):
@@ -90,8 +89,26 @@ class NTM(object):
         self.pred = theano.function(inputs=[self.X],
                                     outputs=self.outputs)
 
+    def save_to_file(self, file_name, file_index=None):
+        """
+        This function stores the trained params to '*.h5' file
 
-    
+        Parameters
+        ----------
+        :type file_name: str
+        :param file_name: the directory with name to store trained parameters
+
+        :type file_index: str, generated as str(1)
+        :param file_index: if parameters here are snapshot,
+                           then we need to add index to file name
+        """
+        if file_index is not None:
+            file_name = file_name[:-3] + str(file_index) + '.h5'
+
+        f = h5py.File(file_name)
+        for p in self.cell.params:
+            f[p.name] = p.get_value()
+        f.close()
 
 
 

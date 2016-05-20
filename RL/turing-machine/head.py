@@ -175,7 +175,7 @@ class Head(object):
             gamma_t : (batch, )
         """
         gamma_t = T.nnet.softplus(T.dot(last_hidden, self.W_gamma) +
-                                  self.b_gamma)
+                                  self.b_gamma) + 1.
 
         # Calculates the final output : w_t
         """ 1. Content Addressing: w_c_t, with size (batch, mem_size)

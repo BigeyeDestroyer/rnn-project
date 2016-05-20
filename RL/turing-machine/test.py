@@ -11,7 +11,7 @@ import operator
 from copy_task import *
 
 
-""" Test controller
+"""
 batch_size = 5
 input_size = 8
 output_size = 8
@@ -69,33 +69,66 @@ print data_out[3].shape
 
 
 
-""" Test head
+""" Test read head
 batch_size = 5
 number = 0
-last_dim = 100
-mem_size = 128
-mem_width = 20
+last_dim = 10
+mem_size = 6
+mem_width = 10
 shift_width = 3
 similarity = cosine_sim
 is_write = False
 
 
-model = Head(is_write=is_write)
+model = Head(is_write=is_write, last_dim=last_dim,
+             mem_size=mem_size, mem_width=mem_width,
+             shift_width=shift_width)
+
 
 M_tm1 = T.tensor3('M_tm1')  # with size (mem_size, mem_width)
 w_tm1 = T.matrix('w_tm1')  # with size (batch_size, mem_size)
 last_hidden = T.matrix('last_hidden')  # with size (batch, last_dim)
+w_t_target = T.matrix('w_t_target')  # with size (batch_size, mem_size)
 
 w_t, read_t = model.step(M_tm1=M_tm1, w_tm1=w_tm1,
-                         last_hidden=last_hidden, batch_size=batch_size)
+                                   last_hidden=last_hidden, batch_size=batch_size)
+cost = T.mean((w_t - w_t_target) ** 2)
 
-fn_head = theano.function(inputs=[M_tm1, w_tm1, last_hidden],
-                          outputs=[w_t, read_t])
+gparams = []
+for param in model.params:
+    gparams.append(T.grad(cost, param))
 
+updates = []
+for p, gp in zip(model.params, gparams):
+    updates.append((p, p - 0.1 * gp))
+
+fn_train = theano.function(inputs=[M_tm1, w_tm1, last_hidden, w_t_target],
+                           outputs=cost, updates=updates)
+fn_output = theano.function(inputs=[M_tm1, w_tm1, last_hidden],
+                            outputs=w_t)
+
+# ndarray inputs
 M_in = numpy.random.randn(batch_size, mem_size, mem_width)
-w_in = numpy.random.randn(batch_size, mem_size)
+
+w_in = numpy.random.rand(batch_size, mem_size)
+w_in = w_in / numpy.reshape(numpy.sum(w_in, axis=1), (w_in.shape[0], 1))
+
+w_out_target = numpy.random.rand(batch_size, mem_size)
+w_out_target = w_out_target / numpy.reshape(
+    numpy.sum(w_out_target, axis=1), (w_out_target.shape[0], 1))
+
 last_in = numpy.random.randn(batch_size, last_dim)
 
+print model.W_key.get_value()
+# call the functions
+cost_output = fn_train(M_in, w_in, last_in, w_out_target)
+output = fn_output(M_in, w_in, last_in)
+
+print model.W_key.get_value().shape
+print model.W_key.get_value()
+"""
+
+"""
 w_out, read_out = fn_head(M_in, w_in, last_in)
 
 print type(w_out)
@@ -159,14 +192,14 @@ print read2_out.shape
 """
 
 
-""" Test the NTMCell class
+
 
 eps = 1e-12
 input_dim = 8
 output_dim = 8
-mem_size = 128
-mem_width = 20
-layer_sizes = [100]
+mem_size = 3
+mem_width = 2
+layer_sizes = [5]
 num_reads = 1
 batch_size = 5
 num_writes = 1
@@ -175,40 +208,62 @@ shift_width = 3
 # Below are the body of the step function
 
 
-"""
-"""
 x_t = T.matrix('x_tm1')  # current input, (batch, input_size)
 
 
+model = NTMCell(input_dim=input_dim, output_dim=output_dim,
+                mem_size=mem_size, mem_width=mem_width,
+                layer_sizes=layer_sizes, num_reads=num_reads,
+                batch_size=batch_size, num_writes=num_writes,
+                shift_width=shift_width)
+output_t = model.step(x_t)
+output_target = T.matrix('output_target')
+cost = T.mean((output_t - output_target) ** 2)
 
-model = NTMCell()
-output_t, state = model.step(x_t)
-M_t = state['M']
-w_read_t_list = state['w_read']
-w_write_t_list = state['w_write']
-read_t_list = state['read']
-c_t_list = state['c']
-h_t_list = state['h']
+params = []
+for idx in range(num_writes):
+    params.append(model.memory.write_heads[idx].W_gamma)
 
-outputs = [M_t] + w_read_t_list + w_write_t_list + \
-          read_t_list + c_t_list + h_t_list
+gparams = []
+for param in params:
+    gparams.append(T.grad(cost, param))
+
+updates = []
+for p, gp in zip(params, gparams):
+    updates.append((p, p - 0.1 * gp))
+
+
+#w_read_t_list = state['w_read']
+#w_write_t_list = state['w_write']
+#read_t_list = state['read']
+#c_t_list = state['c']
+#h_t_list = state['h']
+
 
 fn_test = theano.function(inputs=[x_t],
-                          outputs=outputs)
+                          outputs=output_t)
+fn_train = theano.function(inputs=[x_t, output_target],
+                           outputs=cost)
 
 x_data = numpy.random.randn(batch_size, input_dim)
+out_target = numpy.random.randn(batch_size, output_dim)
+
+out_data = fn_test(x_data)
+cost_out = fn_train(x_data, out_target)
+
+print type(out_data)
+print out_data.shape
+print out_data
+
+print cost_out
 
 
-M_out, w_read_out, w_write_out, read_out, c_out, h_out = \
-    fn_test(x_data)
+#print w_read_out.shape
+#print w_write_out.shape
+#print read_out.shape
+#print c_out.shape
+#print h_out.shape
 
-print M_out.shape
-print w_read_out.shape
-print w_write_out.shape
-print read_out.shape
-print c_out.shape
-print h_out.shape
-"""
 
 
 """ count params

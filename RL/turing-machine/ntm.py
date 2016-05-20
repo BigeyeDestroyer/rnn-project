@@ -7,7 +7,8 @@ class NTM(object):
     def __init__(self, input_dim=8, output_dim=8, mem_size=128,
                  mem_width=20, layer_sizes=[100], num_reads=1,
                  batch_size=16, num_writes=1, shift_width=3,
-                 eps=1e-12):
+                 eps=1e-12, min_grad=-10, max_grad=10,
+                 optimizer='adam'):
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.mem_size = mem_size
@@ -18,9 +19,17 @@ class NTM(object):
         self.num_writes = num_writes
         self.shift_width = shift_width
         self.eps = eps
+        self.min_grad = min_grad
+        self.max_grad = max_grad
+        self.optimizer = optimizer
         # The input sequences with size
         # (sequence_length, batch_size, input_dim)
         self.X = T.tensor3('X')
+        # The output sequences with size
+        # (sequence_length, batch_size, input_dim)
+        self.Y = T.tensor3('Y')
+
+        self.lr = T.scalar('lr')  # the learning rate
 
         # Build the structure
         self.cell = NTMCell(input_dim=input_dim, output_dim=output_dim,
@@ -35,6 +44,7 @@ class NTM(object):
         outputs, _ = theano.scan(fn=self.cell.step,
                                  sequences=self.X)
         self.outputs = outputs
+        self.train_test_funcs()
 
     def negative_log_likelihood(self, Y):
         """
@@ -58,6 +68,31 @@ class NTM(object):
 
         return cost
 
+    def train_test_funcs(self):
+        # The target outputs, with size
+        # (sequence_length, batch_size, output_dim)
+
+        cost = self.negative_log_likelihood(Y=self.Y)
+
+        gparams = []
+        for param in self.cell.params:
+            gparam = T.clip(T.grad(cost=cost, wrt=param),
+                            self.min_grad, self.max_grad)
+            gparams.append(gparam)
+
+
+        # eval(): string to function
+        optimizer = eval(self.optimizer)
+        updates = optimizer(self.cell.params, gparams, self.lr)
+
+        self.train = theano.function(inputs=[self.X, self.Y, self.lr],
+                                     outputs=cost, updates=updates)
+        self.pred = theano.function(inputs=[self.X],
+                                    outputs=self.outputs)
+
+
+
+
 
 
 
@@ -73,19 +108,18 @@ shift_width = 3
 eps = 1e-12
 
 model = NTM()
-Y = T.tensor3('Y')
+
+"""
+fn_test = theano.function(inputs=[model.X, model.Y, model.lr],
+                          outputs=model.train(model.Y, model.Y))
+"""
 
 sequence_length = 20
 input_sequences, output_sequences = \
     generate_copy_sequences(input_size_orig=input_dim,
                             sequence_length=sequence_length,
                             batch_size=batch_size)
-
-fn_test = theano.function(inputs=[model.X, Y],
-                          outputs=model.negative_log_likelihood(Y))
-
-
-out_data = fn_test(input_sequences, output_sequences)
+out_data = model.pred(input_sequences)
 
 print input_sequences.shape
 print output_sequences.shape

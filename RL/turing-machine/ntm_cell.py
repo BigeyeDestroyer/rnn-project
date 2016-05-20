@@ -29,7 +29,8 @@ class NTMCell(object):
                                          mem_size=self.mem_size, mem_width=self.mem_width,
                                          layer_sizes=self.layer_sizes, num_heads=self.num_reads)
         self.memory = Memory(batch_size=self.batch_size, num_read_heads=self.num_reads,
-                             num_write_heads=self.num_writes, layer_sizes=self.layer_sizes)
+                             num_write_heads=self.num_writes, layer_sizes=self.layer_sizes,
+                             mem_size=self.mem_size, mem_width=self.mem_width, shift_width=self.shift_width)
         self.W_output = init_weights(shape=(self.layer_sizes[-1], self.output_dim), name='W_output')
         self.b_output = init_bias(size=self.output_dim, name='b_output')
 

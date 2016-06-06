@@ -5,7 +5,7 @@ from common.utils import *
 
 class EmbeddingLayer(object):
     def __init__(self, layer_id,
-                 shape):
+                 shape, X):
         """
         Embedding layer for rnn model
 
@@ -19,9 +19,8 @@ class EmbeddingLayer(object):
                       n_words is the vocabulary size
                       in_size is the embedding dimension
 
-
-        :type mask: theano variable
-        :param mask: model inputs
+        :type X: a 2D matrix with size (n_timestamps, n_samples)
+        :param X: model inputs to be embedded
 
         :type batch_size: int
         :param batch_size: mini-batch's size
@@ -35,21 +34,11 @@ class EmbeddingLayer(object):
 
         self.params = [self.W]
 
-    def step(self, X):
-        """
-        :type X: a 2D matrix with size (n_timestamps, n_samples)
-        :param X: model inputs to be embedded
+        # Compute the embedded samples
+        self.n_timesteps = X.shape[0]
+        self.n_samples = X.shape[1]
 
-        :return:
-        :type activation: tensor variable with size (t, n, in_size)
-        :param activation: embedded training samples
-        """
-
-        n_timesteps = X.shape[0]
-        n_samples = X.shape[1]
-
-        activation = self.W[X.flatten()].reshape([n_timesteps,
-                                                  n_samples,
-                                                  self.in_size])
-        return activation
+        self.activation = self.W[X.flatten()].reshape([self.n_timesteps,
+                                                       self.n_samples,
+                                                       self.in_size])
 

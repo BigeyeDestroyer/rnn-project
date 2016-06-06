@@ -2,7 +2,9 @@ import numpy
 import theano
 import theano.tensor as T
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
-from utils import *
+import sys
+sys.path.append('..')
+from common.utils import *
 
 
 class SoftmaxLayer(object):

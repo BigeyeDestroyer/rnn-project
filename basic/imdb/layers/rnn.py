@@ -1,18 +1,13 @@
-import numpy
-import theano
-import theano.tensor as T
-
 from embeddings import *
 from lstm import *
 from gru import *
 from softmax import *
-from optimizers import *
 import h5py
 
 
 class RNN(object):
     def __init__(self, n_words, in_size, out_size, hidden_size,
-                 cell='gru', optimizer='rmsprop', p=0.5):
+                 cell='lstm', optimizer='adam', p=0.5):
         """
         :type n_words: int
         :param n_words: vocabulary size
@@ -86,8 +81,8 @@ class RNN(object):
             self.layers.append(hidden_layer)
             self.params += hidden_layer.params
 
-        # output layer, we just average over time for the current task
-        # thus, the activation is (n_samples, out_size)
+        # output layer, we just average over all the output
+        # here the layer_input is with size (t, n, out_size)
         layer_input = hidden_layer.activation  # output of the last lstm
         layer_input = (layer_input * self.maskX[:, :, None]).sum(axis=0)
         layer_input = layer_input / self.maskX.sum(axis=0)[:, None]  # (n_samples, hidden_size)

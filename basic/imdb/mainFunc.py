@@ -1,9 +1,9 @@
-from code_backup.model_train import *
+from layers.rnn import *
+from common.data import *
+import time
+
 
 def pred_error(model, prepare_data, data, iterator):
-    #Just compute the error
-    #f_pred: Theano fct computing the prediction
-    #prepare_data: usual prepare_data for that dataset.
     valid_err = 0
     for _, valid_index in iterator:
         x, mask, y = prepare_data([data[0][t] for t in valid_index],
@@ -13,7 +13,6 @@ def pred_error(model, prepare_data, data, iterator):
     valid_err /= len(iterator)
 
     return valid_err
-
 
 
 """ params for RNN model
@@ -29,9 +28,9 @@ model = RNN(n_words, in_size, out_size, hidden_size)
 """ params for training
 """
 patience = 10
-max_epochs = 500
+max_epochs = 50
 dispFreq = 10
-lr = 0.0001
+lr = 0.001
 validFreq = 500
 saveFreq = 1000
 maxlen = None
@@ -39,7 +38,7 @@ batch_size = 256
 valid_batch_size = 64
 dataset = 'imdb'
 test_size = 500
-saveto = 'lstm_model.npz'
+saveto = 'model/model.h5'
 
 """ load the data
 """
@@ -83,7 +82,6 @@ try:
             x = [train_set[0][t] for t in train_index]
             y = [train_set[1][t] for t in train_index]
 
-
             x, mask, y = prepare_data(x, y)
             n_samples += x.shape[1]
 
@@ -95,17 +93,15 @@ try:
 
             if numpy.mod(uidx, dispFreq) == 0:
                 print('Epoch%d, Update%d, Cost%.6f' % (eidx, uidx, cost))
-                #print('Epoch', eidx, ' Update', uidx, ' Cost ', cost)
 
             if saveto and numpy.mod(uidx, saveFreq) == 0:
                 print('Saving...')
+                model.save_to_file(file_name=saveto, file_index=uidx)
 
             if numpy.mod(uidx, validFreq) == 0:
                 train_err = pred_error(model, prepare_data, train_set, train_shuffle)
                 valid_err = pred_error(model, prepare_data, valid_set, valid_shuffle)
                 test_err = pred_error(model, prepare_data, test_set, test_shuffle)
-
-                history_errs.append([valid_err, test_err])
 
                 print(('Train ', train_err, 'Valid ', valid_err,
                        'Test ', test_err))

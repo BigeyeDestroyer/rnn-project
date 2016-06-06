@@ -5,7 +5,6 @@ import theano.tensor as T
 from embeddings import *
 from lstm import *
 from gru import *
-from logistic import *
 from softmax import *
 from optimizers import *
 import h5py

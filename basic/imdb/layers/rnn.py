@@ -1,6 +1,7 @@
 from embeddings import *
 from lstm import *
 from gru import *
+from basic import *
 from softmax import *
 import h5py
 import sys
@@ -80,6 +81,9 @@ class RNN(object):
             elif self.cell == 'lstm':
                 hidden_layer = LSTMLayer(rng, str(i + 1), shape, layer_input, self.maskX,
                                          self.use_noise, self.drop_rate)
+            else:
+                hidden_layer = BasicLayer(rng, str(i + 1), shape, layer_input, self.maskX,
+                                          self.use_noise, self.drop_rate)
 
             self.layers.append(hidden_layer)
             self.params += hidden_layer.params

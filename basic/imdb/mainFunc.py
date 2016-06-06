@@ -24,8 +24,7 @@ hidden_size = [128]  # this parameter must be a list
 
 print 'Building the model ...'
 model = RNN(n_words=n_words, in_size=in_size,
-            out_size=out_size, hidden_size=hidden_size,
-            cell='basic')
+            out_size=out_size, hidden_size=hidden_size)
 
 """ params for training
 """
@@ -40,7 +39,7 @@ batch_size = 256
 valid_batch_size = 64
 dataset = 'imdb'
 test_size = 500
-saveto = 'model/model_basic.h5'
+saveto = 'models/model.h5'
 
 """ load the data
 """

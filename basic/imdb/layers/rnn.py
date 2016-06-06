@@ -3,6 +3,9 @@ from lstm import *
 from gru import *
 from softmax import *
 import h5py
+import sys
+sys.path.append('..')
+from optimizers.optimizers import *
 
 
 class RNN(object):

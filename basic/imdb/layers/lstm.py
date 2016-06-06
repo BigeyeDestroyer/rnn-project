@@ -1,7 +1,7 @@
 import theano.tensor as T
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 import sys
-sys.append('..')
+sys.path.append('..')
 from common.utils import *
 
 

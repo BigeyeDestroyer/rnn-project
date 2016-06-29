@@ -30,6 +30,8 @@ This folder is for rnn-related materials.
 
 14. [10 tutorial][15]
 
+15. [Harvard RNN Visualization][16]
+
 [1]:	http://handong1587.github.io/deep_learning/2015/10/09/rnn-and-lstm.html#types-of-rnn
 [2]:	https://www.quora.com/What-would-be-your-advice-to-a-software-engineer-who-wants-to-learn-machine-learning-3/answer/Alex-Smola-1
 [3]:	http://cs224d.stanford.edu/index.html
@@ -45,3 +47,4 @@ This folder is for rnn-related materials.
 [13]:	http://cs231n.github.io/
 [14]:	https://github.com/harvardnlp
 [15]:	http://www.kdnuggets.com/2016/04/top-10-ipython-nb-tutorials.html
+[16]:	http://lstm.seas.harvard.edu/

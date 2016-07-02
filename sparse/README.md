@@ -15,6 +15,23 @@ This folder is about the **sparse** work.
 - [A Novel Biologically Mechanism-Based Visual Cognition Model--Automatic Extraction of Semantics, Formation of Integrated Concepts and Re-selection Features for Ambiguity][6]
 	- 2016, arxiv
 
+### Spiking Neural Network
+- [Learning to be Efficient: Algorithms for Training Low-Latency, Low-Compute Deep Spiking Neural Networks][7]
+	- 2016, 1 cited
+- [Sparse Code Formation with Linear Inhibition][8]
+	- 2015 arxiv
+- [Using Firing-Rate Dynamics to Train Recurrent Networks of Spiking Model Neurons][9]
+	- 2016 arxiv, 1 cited
+- [Spiking neural networks for vision tasks][10]
+	- 2015, 23 pages
+- [Deep Adaptive Network: An Efficient Deep Neural Network with Sparse Binary Connections][11]
+	- 2016 arxiv
+- [Simplified spiking neural network architecture and STDP learning algorithm applied to image classification][12]
+	- 2015, 5 cited
+
+
+
+
 
 
 
@@ -26,3 +43,9 @@ This folder is about the **sparse** work.
 [4]:	http://journals.plos.org/plosone/article/asset?id=10.1371%2Fjournal.pone.0081813.PDF
 [5]:	http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.227.9415&rep=rep1&type=pdf
 [6]:	http://arxiv.org/abs/1603.07886
+[7]:	https://www.researchgate.net/profile/Dan_Neil/publication/301549149_Learning_to_be_Efficient_Algorithms_for_Training_Low-Latency_Low-Compute_Deep_Spiking_Neural_Networks/links/5719f04808ae30c3f9f2cd2d.pdf
+[8]:	http://arxiv.org/abs/1503.04115
+[9]:	http://arxiv.org/abs/1601.07620
+[10]:	http://www.nst.ei.tum.de/fileadmin/w00bqs/www/publications/as/2015WS-HS-SpikingVision.pdf
+[11]:	http://arxiv.org/abs/1604.06154
+[12]:	http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.682.9701&rep=rep1&type=pdf

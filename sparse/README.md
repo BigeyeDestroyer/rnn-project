@@ -9,8 +9,12 @@ This folder is about the **sparse** work.
 	- 2016
 - [Sparsity-regularized HMAX for visual recognition][4]
 	- 2014 PloS one, 11 cited.
-- [A Novel Biologically Mechanism-Based Visual Cognition Model--Automatic Extraction of Semantics, Formation of Integrated Concepts and Re-selection Features for Ambiguity][5]
+	- [Learning image representations from the pixel level via hierarchical sparse coding][5]
+		- 2011, 141 cited
+
+- [A Novel Biologically Mechanism-Based Visual Cognition Model--Automatic Extraction of Semantics, Formation of Integrated Concepts and Re-selection Features for Ambiguity][6]
 	- 2016, arxiv
+
 
 
 
@@ -20,4 +24,5 @@ This folder is about the **sparse** work.
 [2]:	http://qipeng.me/research/publications/HuZhangQiZhang14.pdf
 [3]:	http://ac.els-cdn.com/S016516841500290X/1-s2.0-S016516841500290X-main.pdf?_tid=54633b4a-4027-11e6-a08c-00000aacb35d&acdnat=1467445014_c8390737d1d71edf756e71b596650b51
 [4]:	http://journals.plos.org/plosone/article/asset?id=10.1371%2Fjournal.pone.0081813.PDF
-[5]:	http://arxiv.org/abs/1603.07886
+[5]:	http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.227.9415&rep=rep1&type=pdf
+[6]:	http://arxiv.org/abs/1603.07886

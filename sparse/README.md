@@ -38,6 +38,18 @@ This folder is about the **sparse** work.
 	- NIPS2015, 10 cited
 - [Supervised learning based on temporal coding in spiking neural networks][16]
 	- arxiv2016
+- [Spiking Deep Networks with LIF Neurons][17]
+	- arxiv2015, 5 cited
+- [Deep Spiking Networks][18]
+	- **Spiking MLP**, arxiv2016
+- [Fast-classifying, high-accuracy spiking deep networks through weight and threshold balancing][19]
+	- IJCNN2015, 16 cited
+- [Designing spiking neural networks][20]
+	- 2016
+
+
+
+
 
 
 
@@ -67,3 +79,7 @@ This folder is about the **sparse** work.
 [14]:	http://arxiv.org/abs/1601.04187
 [15]:	http://papers.nips.cc/paper/5862-backpropagation-for-energy-efficient-neuromorphic-computing
 [16]:	http://arxiv.org/abs/1606.08165
+[17]:	http://arxiv.org/abs/1510.08829
+[18]:	http://arxiv.org/abs/1602.08323
+[19]:	http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.721.2413&rep=rep1&type=pdf
+[20]:	http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7451989

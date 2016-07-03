@@ -28,6 +28,20 @@ This folder is about the **sparse** work.
 	- 2016 arxiv
 - [Simplified spiking neural network architecture and STDP learning algorithm applied to image classification][12]
 	- 2015, 5 cited
+### From traditional to Spiking 
+- [Spiking deep convolutional neural networks for energy-efficient object recognition][13]
+	- IJCV2015, 14 cited
+- [Conversion of artificial recurrent neural networks to spiking neural networks for low-power neuromorphic hardware][14]
+	- Convert **RNN** to **SNN**
+	- arxiv2016, 1 cited
+- [Backpropagation for energy-efficient neuromorphic computing][15]
+	- NIPS2015, 10 cited
+- [Supervised learning based on temporal coding in spiking neural networks][16]
+	- arxiv2016
+
+
+
+
 
 
 
@@ -49,3 +63,7 @@ This folder is about the **sparse** work.
 [10]:	http://www.nst.ei.tum.de/fileadmin/w00bqs/www/publications/as/2015WS-HS-SpikingVision.pdf
 [11]:	http://arxiv.org/abs/1604.06154
 [12]:	http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.682.9701&rep=rep1&type=pdf
+[13]:	http://download.springer.com/static/pdf/942/art%253A10.1007%252Fs11263-014-0788-3.pdf?originUrl=http%3A%2F%2Flink.springer.com%2Farticle%2F10.1007%2Fs11263-014-0788-3&token2=exp=1467531314~acl=%2Fstatic%2Fpdf%2F942%2Fart%25253A10.1007%25252Fs11263-014-0788-3.pdf%3ForiginUrl%3Dhttp%253A%252F%252Flink.springer.com%252Farticle%252F10.1007%252Fs11263-014-0788-3*~hmac=7521144a4507eea17688169e64011d28026801bc2e946d438acd637c4075d136
+[14]:	http://arxiv.org/abs/1601.04187
+[15]:	http://papers.nips.cc/paper/5862-backpropagation-for-energy-efficient-neuromorphic-computing
+[16]:	http://arxiv.org/abs/1606.08165

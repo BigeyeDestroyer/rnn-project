@@ -57,6 +57,9 @@ This folder is about the **sparse** work.
 	- arxiv2014, 4 cited
 - [Deep SimNets][24]
 	- arxiv2015, 3 cited
+- [Sparsifying Neural Network Connections for Face Recognition][25]
+	- arxiv2015
+
 
 
 
@@ -102,3 +105,4 @@ This folder is about the **sparse** work.
 [22]:	http://papers.nips.cc/paper/5276-deep-networks-with-internal-selective-attention-through-feedback-connections
 [23]:	http://arxiv.org/abs/1410.1165
 [24]:	http://arxiv.org/abs/1506.03059
+[25]:	http://arxiv.org/abs/1512.01891

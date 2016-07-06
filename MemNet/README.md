@@ -7,14 +7,15 @@ This folder is specially for the memory network.
 - [End-To-End Memory Networks][2]
 	- NIPS2015, 78 cited
 - [Towards AI-Complete Question Answering: A Set of Prerequisite Toy Tasks][3]
-	- 83 cited
+	- 83 cited, 2.19 2015 arxiv
 - [Large-scale Simple Question Answering with Memory Networks][4] 
-	- 28 cited
+	- 28 cited, 6.5 2015 arxiv
 - [Evaluating Prerequisite Qualities for Learning End-to-End Dialog Systems][5] 
-	- 7 cited
+	- 7 cited, 11.22 2015 arxiv
 - [The Goldilocks Principle: Reading Children's Books with Explicit Memory Representations][6] 
-	- 19 cited
+	- 19 cited, 11.7 2015 arxiv
 - [Dialog-based Language Learning][7] 
+	- 4.20 2016 arxiv
 - [Learning End-to-End Goal-Oriented Dialog][8]
 	- 2 cited, 5.24 2016 arxiv   
 

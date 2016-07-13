@@ -17,15 +17,24 @@ This folder is specially for the memory network.
 - [Dialog-based Language Learning][7] 
 	- 4.20 2016 arxiv
 - [Learning End-to-End Goal-Oriented Dialog][8]
-	- 2 cited, 5.24 2016 arxiv   
+	- 2 cited, 5.24 2016 arxiv
+### [ICML2016][9]
+- [Learning to Generate with Memory][10]
+- [Ask Me Anything: Dynamic Memory Networks for Natural Language Processing][11]
+	- 49 cited
+- [Meta-Learning with Memory-Augmented Neural Networks][12]
+	- 3 cited
+- [Associative Long Short-Term Memory][13]
+	- 4 cited
+- [Recurrent Orthogonal Networks and Long-Memory Tasks][14]
+- [Dynamic Memory Networks for Visual and Textual Question Answering][15]
+	- 17 cited
+- [Control of Memory, Active Perception, and Action in Minecraft][16]
+	- 2 cited
 
-		  
 
-		  
 
-		  
 
-		  
 
 
 
@@ -40,3 +49,11 @@ This folder is specially for the memory network.
 [6]:	http://arxiv.org/abs/1511.02301
 [7]:	http://arxiv.org/abs/1604.06045
 [8]:	http://arxiv.org/abs/1605.07683
+[9]:	http://jmlr.org/proceedings/papers/v48/
+[10]:	http://arxiv.org/abs/1602.07416
+[11]:	http://arxiv.org/abs/1506.07285
+[12]:	http://jmlr.org/proceedings/papers/v48/santoro16.pdf
+[13]:	http://arxiv.org/abs/1602.03032
+[14]:	http://jmlr.org/proceedings/papers/v48/henaff16.pdf
+[15]:	http://arxiv.org/abs/1603.01417
+[16]:	http://arxiv.org/abs/1605.09128

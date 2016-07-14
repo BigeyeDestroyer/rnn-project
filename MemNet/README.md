@@ -18,6 +18,7 @@ This folder is specially for the memory network.
 	- 4.20 2016 arxiv
 - [Learning End-to-End Goal-Oriented Dialog][8]
 	- 2 cited, 5.24 2016 arxiv
+
 ### [ICML2016][9]
 - [Learning to Generate with Memory][10]
 - [Ask Me Anything: Dynamic Memory Networks for Natural Language Processing][11]

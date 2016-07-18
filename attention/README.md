@@ -65,6 +65,9 @@ This folder is for attention related works.
 16. [gradient-following algorithms for RL][22]
 	- 1992, 1112 cited
 
+17. [Attention-over-Attention Neural Networks for Reading Comprehension][23]
+
+
 [1]:	http://arxiv.org/abs/1603.08575
 [2]:	http://arxiv.org/abs/1603.03101
 [3]:	http://arxiv.org/abs/1602.03609
@@ -87,3 +90,4 @@ This folder is for attention related works.
 [20]:	http://arxiv.org/abs/1502.03044
 [21]:	http://arxiv.org/abs/1406.6247
 [22]:	http://incompleteideas.net/sutton/williams-92.pdf
+[23]:	http://arxiv.org/abs/1607.04423

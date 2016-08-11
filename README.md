@@ -15,7 +15,7 @@ This is a repository for rnn-related papers and techniques.
 
 # top conferences
 1. [IJCAI][6]
-	- Paper Dealine: February 2, 2016
+	- Paper Dealine: February 19, 2016
 	- Rebuttal Period: March 10-11, 2016
 2. [ICLR][7]
 	- Paper Deadline: 

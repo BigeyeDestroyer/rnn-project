@@ -7,7 +7,7 @@ This folder is specially for the memory network.
 - [End-To-End Memory Networks][2]
 	- NIPS2015, 78 cited
 - [Towards AI-Complete Question Answering: A Set of Prerequisite Toy Tasks][3]
-	- 83 cited, 2.19 2015 arxiv
+	- 108 cited, 2.19 2015 arxiv
 - [Large-scale Simple Question Answering with Memory Networks][4] 
 	- 28 cited, 6.5 2015 arxiv
 - [Evaluating Prerequisite Qualities for Learning End-to-End Dialog Systems][5] 
@@ -18,33 +18,36 @@ This folder is specially for the memory network.
 	- 4.20 2016 arxiv
 - [Learning End-to-End Goal-Oriented Dialog][8]
 	- 2 cited, 5.24 2016 arxiv
+- [Stacked attention networks for image question answering][9]
+	- 26 cited, 2015 arxiv
+	- [python][10]
 
-### [ICML2016][9]
-- [Learning to Generate with Memory][10]
-- [Ask Me Anything: Dynamic Memory Networks for Natural Language Processing][11]
-	- 49 cited
-- [Meta-Learning with Memory-Augmented Neural Networks][12]
+### [ICML2016][11]
+- [Learning to Generate with Memory][12]
+- [Ask Me Anything: Dynamic Memory Networks for Natural Language Processing][13]
+	- 71 cited
+- [Meta-Learning with Memory-Augmented Neural Networks][14]
 	- 3 cited
-- [Associative Long Short-Term Memory][13]
+- [Associative Long Short-Term Memory][15]
 	- 4 cited
-- [Recurrent Orthogonal Networks and Long-Memory Tasks][14]
-- [Dynamic Memory Networks for Visual and Textual Question Answering][15]
+- [Recurrent Orthogonal Networks and Long-Memory Tasks][16]
+- [Dynamic Memory Networks for Visual and Textual Question Answering][17]
 	- 17 cited
-- [Control of Memory, Active Perception, and Action in Minecraft][16]
+- [Control of Memory, Active Perception, and Action in Minecraft][18]
 	- 2 cited
 
 ### Works to recover
 1. Dynamic Memory Network
-	- python [code][17]
+	- python [code][19]
 
 2. End-to-end
-	- [tensorflow][18]
-	- [python][19]
+	- [tensorflow][20]
+	- [python][21]
 ### Faculty
-- [Marco Zorzi][20]
-	- [Learning Orthographic Structure With Sequential Generative Neural Networks][21]
+- [Marco Zorzi][22]
+	- [Learning Orthographic Structure With Sequential Generative Neural Networks][23]
 	- **Pay attention** to this project: **GENMOD**
-	- [EuroScience Open Forum 2016][22]: July 26
+	- [EuroScience Open Forum 2016][24]: July 26
 
 
 
@@ -63,17 +66,19 @@ This folder is specially for the memory network.
 [6]:	http://arxiv.org/abs/1511.02301
 [7]:	http://arxiv.org/abs/1604.06045
 [8]:	http://arxiv.org/abs/1605.07683
-[9]:	http://jmlr.org/proceedings/papers/v48/
-[10]:	http://arxiv.org/abs/1602.07416
-[11]:	http://arxiv.org/abs/1506.07285
-[12]:	http://jmlr.org/proceedings/papers/v48/santoro16.pdf
-[13]:	http://arxiv.org/abs/1602.03032
-[14]:	http://jmlr.org/proceedings/papers/v48/henaff16.pdf
-[15]:	http://arxiv.org/abs/1603.01417
-[16]:	http://arxiv.org/abs/1605.09128
-[17]:	https://github.com/swstarlab/DynamicMemoryNetworks
-[18]:	https://github.com/carpedm20/MemN2N-tensorflow
-[19]:	https://github.com/vinhkhuc/MemN2N-babi-python
-[20]:	https://scholar.google.com/citations?hl=zh-CN&user=MgF3uIMAAAAJ&view_op=list_works&sortby=pubdate
-[21]:	http://s3.amazonaws.com/academia.edu.documents/42328867/Learning_Orthographic_Structure_With_Seq20160207-26129-1rlm2pc.pdf?AWSAccessKeyId=AKIAJ56TQJRTWSMTNPEA&Expires=1468932324&Signature=daiAMmhswxs4FH6URXaOBLqBR5g%3D&response-content-disposition=inline%3B%20filename%3DLearning_Orthographic_Structure_With_Seq.pdf
-[22]:	http://www.esof.eu/
+[9]:	http://arxiv.org/abs/1511.02274
+[10]:	https://github.com/zcyang/imageqa-san
+[11]:	http://jmlr.org/proceedings/papers/v48/
+[12]:	http://arxiv.org/abs/1602.07416
+[13]:	http://arxiv.org/abs/1506.07285
+[14]:	http://jmlr.org/proceedings/papers/v48/santoro16.pdf
+[15]:	http://arxiv.org/abs/1602.03032
+[16]:	http://jmlr.org/proceedings/papers/v48/henaff16.pdf
+[17]:	http://arxiv.org/abs/1603.01417
+[18]:	http://arxiv.org/abs/1605.09128
+[19]:	https://github.com/swstarlab/DynamicMemoryNetworks
+[20]:	https://github.com/carpedm20/MemN2N-tensorflow
+[21]:	https://github.com/vinhkhuc/MemN2N-babi-python
+[22]:	https://scholar.google.com/citations?hl=zh-CN&user=MgF3uIMAAAAJ&view_op=list_works&sortby=pubdate
+[23]:	http://s3.amazonaws.com/academia.edu.documents/42328867/Learning_Orthographic_Structure_With_Seq20160207-26129-1rlm2pc.pdf?AWSAccessKeyId=AKIAJ56TQJRTWSMTNPEA&Expires=1468932324&Signature=daiAMmhswxs4FH6URXaOBLqBR5g%3D&response-content-disposition=inline%3B%20filename%3DLearning_Orthographic_Structure_With_Seq.pdf
+[24]:	http://www.esof.eu/

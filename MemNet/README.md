@@ -33,11 +33,18 @@ This folder is specially for the memory network.
 - [Control of Memory, Active Perception, and Action in Minecraft][16]
 	- 2 cited
 
+### Works to recover
+1. Dynamic Memory Network
+	- python [code][17]
+
+2. End-to-end
+	- [tensorflow][18]
+	- [python][19]
 ### Faculty
-- [Marco Zorzi][17]
-	- [Learning Orthographic Structure With Sequential Generative Neural Networks][18]
+- [Marco Zorzi][20]
+	- [Learning Orthographic Structure With Sequential Generative Neural Networks][21]
 	- **Pay attention** to this project: **GENMOD**
-	- [EuroScience Open Forum 2016][19]: July 26
+	- [EuroScience Open Forum 2016][22]: July 26
 
 
 
@@ -64,6 +71,9 @@ This folder is specially for the memory network.
 [14]:	http://jmlr.org/proceedings/papers/v48/henaff16.pdf
 [15]:	http://arxiv.org/abs/1603.01417
 [16]:	http://arxiv.org/abs/1605.09128
-[17]:	https://scholar.google.com/citations?hl=zh-CN&user=MgF3uIMAAAAJ&view_op=list_works&sortby=pubdate
-[18]:	http://s3.amazonaws.com/academia.edu.documents/42328867/Learning_Orthographic_Structure_With_Seq20160207-26129-1rlm2pc.pdf?AWSAccessKeyId=AKIAJ56TQJRTWSMTNPEA&Expires=1468932324&Signature=daiAMmhswxs4FH6URXaOBLqBR5g%3D&response-content-disposition=inline%3B%20filename%3DLearning_Orthographic_Structure_With_Seq.pdf
-[19]:	http://www.esof.eu/
+[17]:	https://github.com/swstarlab/DynamicMemoryNetworks
+[18]:	https://github.com/carpedm20/MemN2N-tensorflow
+[19]:	https://github.com/vinhkhuc/MemN2N-babi-python
+[20]:	https://scholar.google.com/citations?hl=zh-CN&user=MgF3uIMAAAAJ&view_op=list_works&sortby=pubdate
+[21]:	http://s3.amazonaws.com/academia.edu.documents/42328867/Learning_Orthographic_Structure_With_Seq20160207-26129-1rlm2pc.pdf?AWSAccessKeyId=AKIAJ56TQJRTWSMTNPEA&Expires=1468932324&Signature=daiAMmhswxs4FH6URXaOBLqBR5g%3D&response-content-disposition=inline%3B%20filename%3DLearning_Orthographic_Structure_With_Seq.pdf
+[22]:	http://www.esof.eu/

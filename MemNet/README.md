@@ -43,6 +43,7 @@ This folder is specially for the memory network.
 2. End-to-end
 	- [tensorflow][20]
 	- [python][21]
+
 ### Faculty
 - [Marco Zorzi][22]
 	- [Learning Orthographic Structure With Sequential Generative Neural Networks][23]

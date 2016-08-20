@@ -246,6 +246,9 @@ class Linear(Module):
         high_dimension_input = input_data.ndim > 2
 
         # Reshape input
+        #
+        # Actually, in this work, we think that the first dimension
+        # of input_data is the feature dimension
         if high_dimension_input:
             input_data = input_data.reshape(input_data.shape[0], -1)
 
@@ -263,12 +266,12 @@ class Linear(Module):
 
         # Reshape input and grad_output
         if high_dimension_input:
-            input_data  = input_data.reshape(input_data.shape[0], -1)
+            input_data = input_data.reshape(input_data.shape[0], -1)
             grad_output = grad_output.reshape(grad_output.shape[0], -1)
 
         self.weight.grad = self.weight.grad + np.dot(grad_output, input_data.T)
-        self.bias.grad   = self.bias.grad + grad_output.sum(axis=1)
-        self.grad_input  = np.dot(self.weight.D.T, grad_output)
+        self.bias.grad = self.bias.grad + grad_output.sum(axis=1)
+        self.grad_input = np.dot(self.weight.D.T, grad_output)
 
         if high_dimension_input:
             self.grad_input = self.grad_input.reshape(orig_input_data_shape)
@@ -290,8 +293,8 @@ class LinearNB(Module):
     """
     def __init__(self, in_dim, out_dim, do_transpose=False):
         super(LinearNB, self).__init__()
-        self.in_dim       = in_dim
-        self.out_dim      = out_dim
+        self.in_dim = in_dim
+        self.out_dim = out_dim
         self.do_transpose = do_transpose
 
         if do_transpose:
@@ -326,10 +329,10 @@ class LinearNB(Module):
 
         if self.do_transpose:
             self.weight.grad = self.weight.grad + np.dot(input_data, grad_output.T)
-            self.grad_input  = np.dot(self.weight.D, grad_output)
+            self.grad_input = np.dot(self.weight.D, grad_output)
         else:
             self.weight.grad = self.weight.grad + np.dot(grad_output, input_data.T)
-            self.grad_input  = np.dot(self.weight.D.T, grad_output)
+            self.grad_input = np.dot(self.weight.D.T, grad_output)
 
         if high_dimension_input:
             self.grad_input = self.grad_input.reshape(orig_input_data_shape)
@@ -356,9 +359,9 @@ class LookupTable(Module):
             out_dim (int): output dimension
         """
         super(LookupTable, self).__init__()
-        self.sz      = voc_sz
+        self.sz = voc_sz
         self.out_dim = out_dim
-        self.weight  = Weight((out_dim, voc_sz))
+        self.weight = Weight((out_dim, voc_sz))
 
     def fprop(self, input_data):
         self.output = self.weight.D[:, input_data.T.astype(np.int).flatten()]
@@ -625,6 +628,15 @@ class CrossEntropyLoss(Loss):
         self.size_average = True
 
     def fprop(self, input_data, target_data):
+        """
+
+        Args:
+            input_data: ndarray with size (|Vocabulary|, num_words)
+                        probability of each word in the dictionary
+
+            target_data: (num_words, )
+                         the target words
+        """
         tmp = [(t, i) for i, t in enumerate(target_data)]
         z = zip(*tmp)  # unzipping trick !
         cost = np.sum(-np.log(input_data[z]))

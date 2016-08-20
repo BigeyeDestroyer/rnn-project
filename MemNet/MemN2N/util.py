@@ -14,8 +14,8 @@ def parse_babi_task(data_files, dictionary, include_question):
     """ Parse bAbI data.
 
     Args:
-       data_files (list): a list of data file's paths.
-       dictionary (dict): word's dictionary
+       data_files (list): a list of data file's relative paths.
+       dictionary (dict): word's dictionary, (key: value) = (word: number)
        include_question (bool): whether count question toward input sentence.
 
     Returns:
@@ -34,11 +34,17 @@ def parse_babi_task(data_files, dictionary, include_question):
     """
     # Try to reserve spaces beforehand (large matrices for both 1k and 10k data sets)
     # maximum number of words in sentence = 20
-    story     = np.zeros((20, 500, len(data_files) * 3500), np.int16)
+    #
+    # For each task, we have 1000 or 10k questions for training
+    story = np.zeros((20, 500, len(data_files) * 3500), np.int16)
     questions = np.zeros((14, len(data_files) * 10000), np.int16)
-    qstory    = np.zeros((20, len(data_files) * 10000), np.int16)
+    qstory = np.zeros((20, len(data_files) * 10000), np.int16)
 
     # NOTE: question's indices are not reset when going through a new story
+    #       max_words     : maximum number of words in a sentence
+    #       max_sentences : maximum number of sentences in a story
+    #       question_idx  : indice among all the 1000/10000 questions
+    #       sentence_idx  : indice among a certain story
     story_idx, question_idx, sentence_idx, max_words, max_sentences = -1, -1, -1, 0, 0
 
     # Mapping line number (within a story) to sentence's index (to support the flag include_question)
@@ -91,6 +97,11 @@ def parse_babi_task(data_files, dictionary, include_question):
                             story[k - 1, sentence_idx, story_idx] = dictionary[w]
 
                         # NOTE: Punctuation is already removed from w
+                        #
+                        # Since '?' has been removed from w, we can only
+                        # use words[k] to test whether there is '?'
+                        #
+                        # Word after question is the answer
                         if words[k].endswith('?'):
                             answer = words[k + 1]
                             if answer not in dictionary:
@@ -108,9 +119,9 @@ def parse_babi_task(data_files, dictionary, include_question):
                 if max_sentences < sentence_idx + 1:
                     max_sentences = sentence_idx + 1
 
-    story     = story[:max_words, :max_sentences, :(story_idx + 1)]
+    story = story[:max_words, :max_sentences, :(story_idx + 1)]
     questions = questions[:, :(question_idx + 1)]
-    qstory    = qstory[:max_words, :(question_idx + 1)]
+    qstory = qstory[:max_words, :(question_idx + 1)]
 
     return story, questions, qstory
 

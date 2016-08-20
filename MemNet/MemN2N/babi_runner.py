@@ -23,7 +23,7 @@ def run_task(data_dir, task_id):
 
     # Parse data
     train_files = glob.glob('%s/qa%d_*_train.txt' % (data_dir, task_id))
-    test_files  = glob.glob('%s/qa%d_*_test.txt' % (data_dir, task_id))
+    test_files = glob.glob('%s/qa%d_*_test.txt' % (data_dir, task_id))
 
     dictionary = {"nil": 0}
     train_story, train_questions, train_qstory = parse_babi_task(train_files, dictionary, False)

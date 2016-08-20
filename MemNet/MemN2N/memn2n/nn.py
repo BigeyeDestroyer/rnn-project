@@ -14,7 +14,7 @@ class Module(object):
     __metaclass__ = ABCMeta
 
     def __init__(self):
-        self.output     = None
+        self.output = None
         self.grad_input = None
 
     @abstractmethod
@@ -51,6 +51,8 @@ class Container(Module):
         for module in self.modules:
             module.update(params)
 
+    # 'share' maybe means copy params
+    # from one network to another
     def share(self, m):
         for c_module, m_module in zip(self.modules, m.modules):
             c_module.share(m_module)
@@ -109,6 +111,7 @@ class AddTable(Module):
             self.output += elem
         return self.output
 
+    # Just duplicate the grads since the operation is 'add'
     def bprop(self, input_data, grad_output):
         self.grad_input = [grad_output for _ in range(len(input_data))]
         return self.grad_input
@@ -154,6 +157,8 @@ class Duplicate(Module):
         self.output = [input_data, input_data]
         return self.output
 
+    # We can see that backprop of duplicate
+    # just sums up the output grads
     def bprop(self, input_data, grad_output):
         self.grad_input = grad_output[0] + grad_output[1]
         return self.grad_input
@@ -232,10 +237,10 @@ class Linear(Module):
     """
     def __init__(self, in_dim, out_dim):
         super(Linear, self).__init__()
-        self.in_dim  = in_dim
+        self.in_dim = in_dim
         self.out_dim = out_dim
-        self.weight  = Weight((out_dim, in_dim))
-        self.bias    = Weight((out_dim, 1))
+        self.weight = Weight((out_dim, in_dim))
+        self.bias = Weight((out_dim, 1))
 
     def fprop(self, input_data):
         high_dimension_input = input_data.ndim > 2
@@ -573,8 +578,8 @@ class Weight(object):
         Args:
             sz (tuple): shape
         """
-        self.sz   = sz
-        self.D    = 0.1 * np.random.standard_normal(sz)
+        self.sz = sz
+        self.D = 0.1 * np.random.standard_normal(sz)
         self.grad = np.zeros(sz, np.float32)
 
     def update(self, params):
@@ -591,8 +596,8 @@ class Weight(object):
         self.grad[:] = 0
 
     def clone(self):
-        m      = Weight(self.sz)
-        m.D    = np.copy(self.D)
+        m = Weight(self.sz)
+        m.D = np.copy(self.D)
         m.grad = np.copy(self.grad)
         return m
 
@@ -616,8 +621,8 @@ class CrossEntropyLoss(Loss):
 
     def __init__(self):
         self.do_softmax_bprop = False
-        self.eps              = 1e-7
-        self.size_average     = True
+        self.eps = 1e-7
+        self.size_average = True
 
     def fprop(self, input_data, target_data):
         tmp = [(t, i) for i, t in enumerate(target_data)]

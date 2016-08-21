@@ -23,7 +23,8 @@ class Memory(Module):
         self.nil_word = train_config["voc_sz"]
         self.config = train_config
 
-        # self.data is the Sentences {x_{i}'s}
+        # self.data is the Sentences {x_{i}'s} with size
+        # [length of sentence, batch_size]
         self.data = np.zeros((self.sz, train_config["bsz"]), np.float32)
 
         self.emb_query = None
@@ -67,8 +68,6 @@ class Memory(Module):
     # and the supporting sentences have been defined
     # as 'self.data'
     def fprop(self, input_data):
-        # 'mod_query' and 'mod_out' are lookup tables,
-        # thus receiving two params
         self.probs = self.mod_query.fprop([self.data, input_data])
         self.output = self.mod_out.fprop([self.data, self.probs])
         return self.output

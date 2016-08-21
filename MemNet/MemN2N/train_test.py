@@ -40,8 +40,10 @@ def train(train_story, train_questions, train_qstory, memory, model, loss, gener
             # Question batch
             batch = train_range[np.random.randint(train_len, size=batch_size)]
 
-            input_data  = np.zeros((train_story.shape[0], batch_size), np.float32) # words of training questions
-            target_data = train_questions[2, batch]                                # indices of training answers
+            # words of training questions
+            input_data = np.zeros((train_story.shape[0], batch_size), np.float32)
+            # target_data with size (batch, )
+            target_data = train_questions[2, batch]  # indices of training answers
 
             memory[0].data[:] = dictionary["nil"]
 
@@ -49,6 +51,8 @@ def train(train_story, train_questions, train_qstory, memory, model, loss, gener
             for b in range(batch_size):
                 # NOTE: +1 since train_questions[1, :] is the index of the sentence right before the training question.
                 # d is a batch of [word indices in sentence, sentence indices from batch] for this story
+                #
+                # d is all the related sentences of a certain single question
                 d = train_story[:, :(1 + train_questions[1, batch[b]]), train_questions[0, batch[b]]]
 
                 # Pick a fixed number of latest sentences (before the question) from the story
@@ -65,7 +69,7 @@ def train(train_story, train_questions, train_qstory, memory, model, loss, gener
                         nblank = np.random.randint(int(math.ceil(d.shape[1] * randomize_time)))
                         rt = np.random.permutation(d.shape[1] + nblank)
 
-                        rt[rt >= train_config["sz"]] = train_config["sz"] - 1 # put the cap
+                        rt[rt >= train_config["sz"]] = train_config["sz"] - 1  # put the cap
 
                         # Add random time (must be > dictionary's length) into the time word (decreasing order)
                         memory[0].data[-1, :d.shape[1], b] = np.sort(rt[:d.shape[1]])[::-1] + len(dictionary)
@@ -81,24 +85,25 @@ def train(train_story, train_questions, train_qstory, memory, model, loss, gener
 
             out = model.fprop(input_data)
             total_cost += loss.fprop(out, target_data)
-            total_err  += loss.get_error(out, target_data)
-            total_num  += batch_size
+            total_err += loss.get_error(out, target_data)
+            total_num += batch_size
 
             grad = loss.bprop(out, target_data)
             model.bprop(input_data, grad)
             model.update(params)
 
+            # Which means that the word 'nil' makes non-sense
             for i in range(nhops):
                 memory[i].emb_query.weight.D[:, 0] = 0
 
         # Validation
-        total_val_err  = 0.
+        total_val_err = 0.
         total_val_cost = 0.
-        total_val_num  = 0
+        total_val_num = 0
 
         for k in range(int(math.floor(val_len / batch_size))):
-            batch       = val_range[np.arange(k * batch_size, (k + 1) * batch_size)]
-            input_data  = np.zeros((train_story.shape[0], batch_size), np.float32)
+            batch = val_range[np.arange(k * batch_size, (k + 1) * batch_size)]
+            input_data = np.zeros((train_story.shape[0], batch_size), np.float32)
             target_data = train_questions[2, batch]
 
             memory[0].data[:] = dictionary["nil"]
@@ -122,11 +127,11 @@ def train(train_story, train_questions, train_qstory, memory, model, loss, gener
 
             out = model.fprop(input_data)
             total_val_cost += loss.fprop(out, target_data)
-            total_val_err  += loss.get_error(out, target_data)
-            total_val_num  += batch_size
+            total_val_err += loss.get_error(out, target_data)
+            total_val_num += batch_size
 
         train_error = total_err / total_num
-        val_error   = total_val_err / total_val_num
+        val_error = total_val_err / total_val_num
 
         print("%d | train error: %g | val error: %g" % (ep + 1, train_error, val_error))
 
@@ -140,14 +145,14 @@ def train_linear_start(train_story, train_questions, train_qstory, memory, model
         memory[i].mod_query.modules.pop()
 
     # Save settings
-    nepochs2          = general_config.nepochs
+    nepochs2 = general_config.nepochs
     lrate_decay_step2 = general_config.lrate_decay_step
-    init_lrate2       = train_config["init_lrate"]
+    init_lrate2 = train_config["init_lrate"]
 
     # Add new settings
-    general_config.nepochs          = general_config.ls_nepochs
+    general_config.nepochs = general_config.ls_nepochs
     general_config.lrate_decay_step = general_config.ls_lrate_decay_step
-    train_config["init_lrate"]      = general_config.ls_init_lrate
+    train_config["init_lrate"] = general_config.ls_init_lrate
 
     # Train with new settings
     train(train_story, train_questions, train_qstory, memory, model, loss, general_config)
@@ -157,9 +162,9 @@ def train_linear_start(train_story, train_questions, train_qstory, memory, model
         memory[i].mod_query.add(Softmax())
 
     # Restore old settings
-    general_config.nepochs          = nepochs2
+    general_config.nepochs = nepochs2
     general_config.lrate_decay_step = lrate_decay_step2
-    train_config["init_lrate"]      = init_lrate2
+    train_config["init_lrate"] = init_lrate2
 
     # Train with old settings
     train(train_story, train_questions, train_qstory, memory, model, loss, general_config)
@@ -169,11 +174,11 @@ def test(test_story, test_questions, test_qstory, memory, model, loss, general_c
     total_test_err = 0.
     total_test_num = 0
 
-    nhops        = general_config.nhops
+    nhops = general_config.nhops
     train_config = general_config.train_config
-    batch_size   = general_config.batch_size
-    dictionary   = general_config.dictionary
-    enable_time  = general_config.enable_time
+    batch_size = general_config.batch_size
+    dictionary = general_config.dictionary
+    enable_time = general_config.enable_time
 
     max_words = train_config["max_words"] \
         if not enable_time else train_config["max_words"] - 1
@@ -184,7 +189,7 @@ def test(test_story, test_questions, test_qstory, memory, model, loss, general_c
         input_data = np.zeros((max_words, batch_size), np.float32)
         target_data = test_questions[2, batch]
 
-        input_data[:]     = dictionary["nil"]
+        input_data[:] = dictionary["nil"]
         memory[0].data[:] = dictionary["nil"]
 
         for b in range(batch_size):

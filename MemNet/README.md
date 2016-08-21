@@ -40,9 +40,13 @@ This folder is specially for the memory network.
 1. Dynamic Memory Network
 	- python [code][19]
 
-2. End-to-end
+
+
+### Works recovered
+1. End-to-end
 	- [tensorflow][20]
 	- [python][21]
+	- on **bigeye7**
 
 ### Faculty
 - [Marco Zorzi][22]

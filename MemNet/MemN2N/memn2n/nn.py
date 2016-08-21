@@ -371,6 +371,10 @@ class LookupTable(Module):
 
     def bprop(self, input_data, grad_output):
         # Make sure input_data has one dim lower than grad_output (see the index below)
+        #
+        # Since the input data will add one additional
+        # dimension after lookup operation
+
         if input_data.ndim == grad_output.ndim:
             input_data = np.squeeze(input_data)  # TODO: Seems clumsy!
 

@@ -13,22 +13,22 @@ class Memory(Module):
     def __init__(self, train_config):
         super(Memory, self).__init__()
 
-        self.sz        = train_config["sz"]
-        self.voc_sz    = train_config["voc_sz"]
-        self.in_dim    = train_config["in_dim"]
-        self.out_dim   = train_config["out_dim"]
+        self.sz = train_config["sz"]
+        self.voc_sz = train_config["voc_sz"]
+        self.in_dim = train_config["in_dim"]  # embedding dim of the input
+        self.out_dim = train_config["out_dim"]
 
         # TODO: Mark self.nil_word and self.data as None since they will be overriden eventually
         # In build.model.py, memory[i].nil_word = dictionary['nil']"
-        self.nil_word  = train_config["voc_sz"]
-        self.config    = train_config
-        self.data      = np.zeros((self.sz, train_config["bsz"]), np.float32)
+        self.nil_word = train_config["voc_sz"]
+        self.config = train_config
+        self.data = np.zeros((self.sz, train_config["bsz"]), np.float32)
 
         self.emb_query = None
-        self.emb_out   = None
+        self.emb_out = None
         self.mod_query = None
-        self.mod_out   = None
-        self.probs     = None
+        self.mod_out = None
+        self.probs = None
 
         self.init_query_module()
         self.init_output_module()
@@ -89,9 +89,17 @@ class MemoryBoW(Memory):
     """
     def __init__(self, config):
         super(MemoryBoW, self).__init__(config)
+        # 'sz' indicates number of sentences in a certain story
         self.data = np.zeros((config["max_words"], self.sz, config["bsz"]), np.float32)
 
     def init_query_module(self):
+        """
+        Input query with size      (num_words, num_questions)
+        After embedding, with size (in_dim, num_questions)
+
+        Which means that we compress each
+        sentence into one word embedding
+        """
         self.emb_query = LookupTable(self.voc_sz, self.in_dim)
         s = Sequential()
         s.add(self.emb_query)

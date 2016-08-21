@@ -15,13 +15,15 @@ class Memory(Module):
 
         self.sz = train_config["sz"]
         self.voc_sz = train_config["voc_sz"]
-        self.in_dim = train_config["in_dim"]  # embedding dim of the input
-        self.out_dim = train_config["out_dim"]
+        self.in_dim = train_config["in_dim"]  # embedding dim of the input, matrix 'A'
+        self.out_dim = train_config["out_dim"]  # embedding dim of the output, matrix 'C'
 
         # TODO: Mark self.nil_word and self.data as None since they will be overriden eventually
         # In build.model.py, memory[i].nil_word = dictionary['nil']"
         self.nil_word = train_config["voc_sz"]
         self.config = train_config
+
+        # self.data is the Sentences {x_{i}'s}
         self.data = np.zeros((self.sz, train_config["bsz"]), np.float32)
 
         self.emb_query = None
@@ -61,7 +63,12 @@ class Memory(Module):
         self.data[1:, :] = self.data[:-1, :]  # shift rows down
         self.data[0, :] = data_row            # add the new data row on top
 
+    # input_data is the embedding of query data
+    # and the supporting sentences have been defined
+    # as 'self.data'
     def fprop(self, input_data):
+        # 'mod_query' and 'mod_out' are lookup tables,
+        # thus receiving two params
         self.probs = self.mod_query.fprop([self.data, input_data])
         self.output = self.mod_out.fprop([self.data, self.probs])
         return self.output

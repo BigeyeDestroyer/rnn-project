@@ -9,19 +9,19 @@ from util import Progress
 
 def train(train_story, train_questions, train_qstory, memory, model, loss, general_config):
 
-    train_config     = general_config.train_config
-    dictionary       = general_config.dictionary
-    nepochs          = general_config.nepochs
-    nhops            = general_config.nhops
-    batch_size       = general_config.batch_size
-    enable_time      = general_config.enable_time
-    randomize_time   = general_config.randomize_time
+    train_config = general_config.train_config
+    dictionary = general_config.dictionary
+    nepochs = general_config.nepochs
+    nhops = general_config.nhops
+    batch_size = general_config.batch_size
+    enable_time = general_config.enable_time
+    randomize_time = general_config.randomize_time
     lrate_decay_step = general_config.lrate_decay_step
 
-    train_range    = general_config.train_range  # indices of training questions
-    val_range      = general_config.val_range    # indices of validation questions
-    train_len      = len(train_range)
-    val_len        = len(val_range)
+    train_range = general_config.train_range  # indices of training questions
+    val_range = general_config.val_range    # indices of validation questions
+    train_len = len(train_range)
+    val_len = len(val_range)
 
     params = {
         "lrate": train_config["init_lrate"],
@@ -33,9 +33,9 @@ def train(train_story, train_questions, train_qstory, memory, model, loss, gener
         if (ep + 1) % lrate_decay_step == 0:
             params["lrate"] *= 0.5
 
-        total_err  = 0.
+        total_err = 0.
         total_cost = 0.
-        total_num  = 0
+        total_num = 0
         for _ in Progress(range(int(math.floor(train_len / batch_size)))):
             # Question batch
             batch = train_range[np.random.randint(train_len, size=batch_size)]

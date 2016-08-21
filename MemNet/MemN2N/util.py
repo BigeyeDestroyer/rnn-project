@@ -142,20 +142,22 @@ def build_model(general_config):
             Parallel -> { LookupTable + ElemMult + Sum } -> Identity -> MatVecProd
     """
     train_config = general_config.train_config
-    dictionary   = general_config.dictionary
-    use_bow      = general_config.use_bow
-    nhops        = general_config.nhops
-    add_proj     = general_config.add_proj
-    share_type   = general_config.share_type
-    enable_time  = general_config.enable_time
-    add_nonlin   = general_config.add_nonlin
+    dictionary = general_config.dictionary
+    use_bow = general_config.use_bow
+    nhops = general_config.nhops
+    add_proj = general_config.add_proj
+    share_type = general_config.share_type
+    enable_time = general_config.enable_time
+    add_nonlin = general_config.add_nonlin
 
-    in_dim    = train_config["in_dim"]
-    out_dim   = train_config["out_dim"]
+    in_dim = train_config["in_dim"]
+    out_dim = train_config["out_dim"]
     max_words = train_config["max_words"]
-    voc_sz    = train_config["voc_sz"]
+    voc_sz = train_config["voc_sz"]
 
     if not use_bow:
+        # This "weight" reorganize the words, not simply
+        # sum up all the representations of the words
         train_config["weight"] = np.ones((in_dim, max_words), np.float32)
         for i in range(in_dim):
             for j in range(max_words):
@@ -166,6 +168,8 @@ def build_model(general_config):
 
     memory = {}
     model = Sequential()
+    # This lookup table if for matrix 'B'
+    # in memory network and we embed
     model.add(LookupTable(voc_sz, in_dim))
     if not use_bow:
         if enable_time:
@@ -173,6 +177,8 @@ def build_model(general_config):
         else:
             model.add(ElemMult(train_config["weight"]))
 
+    # Here, we have the embeddings of the questions
+    # Corresponding to matrix 'B'
     model.add(Sum(dim=1))
 
     proj = {}
@@ -184,6 +190,8 @@ def build_model(general_config):
 
         # Override nil_word which is initialized in "self.nil_word = train_config["voc_sz"]"
         memory[i].nil_word = dictionary['nil']
+
+        # Duplicate the embedding of questions
         model.add(Duplicate())
         p = Parallel()
         p.add(memory[i])
@@ -205,6 +213,11 @@ def build_model(general_config):
     # Share weights
     if share_type == 1:
         # Type 1: adjacent weight tying
+        #
+        # Here, we share 'weight', which is an
+        # object of a class. Then any
+        # modifications on either will influence
+        # the other modules.
         memory[0].emb_query.share(model.modules[0])
         for i in range(1, nhops):
             memory[i].emb_query.share(memory[i - 1].emb_out)

@@ -201,7 +201,7 @@ def test(test_story, test_questions, test_qstory, memory, model, loss, general_c
             memory[0].data[:d.shape[0], :d.shape[1], b] = d
 
             if enable_time:
-                memory[0].data[-1, :d.shape[1], b] = np.arange(d.shape[1])[::-1] + len(dictionary) # time words
+                memory[0].data[-1, :d.shape[1], b] = np.arange(d.shape[1])[::-1] + len(dictionary)  # time words
 
             input_data[:test_qstory.shape[0], b] = test_qstory[:, batch[b]]
 

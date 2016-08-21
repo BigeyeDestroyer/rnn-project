@@ -96,6 +96,10 @@ class MemoryBoW(Memory):
     def __init__(self, config):
         super(MemoryBoW, self).__init__(config)
         # 'sz' indicates number of sentences in a certain story
+        # data with size [num_words, num_sentences, batch_size]
+        #
+        # After embedding, the matrix will become
+        # [emb_dim, num_sentences, batch_size]
         self.data = np.zeros((config["max_words"], self.sz, config["bsz"]), np.float32)
 
     def init_query_module(self):

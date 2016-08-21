@@ -27,7 +27,7 @@ def run_task(data_dir, task_id):
 
     dictionary = {"nil": 0}
     train_story, train_questions, train_qstory = parse_babi_task(train_files, dictionary, False)
-    test_story, test_questions, test_qstory    = parse_babi_task(test_files, dictionary, False)
+    test_story, test_questions, test_qstory = parse_babi_task(test_files, dictionary, False)
 
     general_config = BabiConfig(train_story, train_questions, dictionary)
 
@@ -68,7 +68,7 @@ def run_joint_tasks(data_dir):
     # Parse test data for each task so that the dictionary covers all words before training
     for t in tasks:
         test_data_path = glob.glob('%s/qa%d_*_test.txt' % (data_dir, t + 1))
-        parse_babi_task(test_data_path, dictionary, False) # ignore output for now
+        parse_babi_task(test_data_path, dictionary, False)  # ignore output for now
 
     general_config = BabiConfigJoint(train_story, train_questions, dictionary)
     memory, model, loss = build_model(general_config)

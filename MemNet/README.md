@@ -54,6 +54,10 @@ This folder is specially for the memory network.
 	- **Pay attention** to this project: **GENMOD**
 	- [EuroScience Open Forum 2016][24]: July 26
 
+### Ideas
+- 2016.8.21
+	- About MemN2N. Actually the attention used here is on **sentence level**, what if we detail it into **phrase level**? Such as the recently proposed **structure attention work**.  
+
 
 
 

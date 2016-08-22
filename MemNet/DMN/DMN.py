@@ -14,12 +14,14 @@ import h5py
 class SemMemModule(MergeLayer):
     # Semantic Memory Module (= Word Embedding Layer)
     # Lasagne Library has Merge Layer, which is basic layer class accepting multiple inputs.
-    # Semantic Memory Module and its parameters ared shared into Input Module and Question Module.
+    # Semantic Memory Module and its parameters are shared into Input Module and Question Module.
     # Therefore, It might not act as ordinary feed-forward layer, and needs extra codes to be trained.
     def __init__(self, incomings, voc_size, hid_state_size, W=Normal(), **kwargs):
         # Initialize parameters and create theano variables
         super(SemMemModule, self).__init__(incomings, **kwargs)
         self.hid_state_size = hid_state_size
+        # Here, 'W' is a shared variable
+        # each row a representation of a word
         self.W = self.add_param(W, (voc_size, hid_state_size), name='Word_Embedding', regularizable=False)
         self.rand_stream = RandomStreams(np.random.randint(1, 2147462579))
     
@@ -31,13 +33,25 @@ class SemMemModule(MergeLayer):
         # Core part that actually describes how the theano variables work to produce output
         # input is in shape of (batch, sentence, word)
         # word_dropout is the varible determines the proportion of words to be masked to 0-vectors
-        input         = inputs[0]
-        word_dropout  = inputs[1]
+        input = inputs[0]
+        word_dropout = inputs[1]
 
         # Apply an input tensor to word embedding matrix and word_dropout.
         # And then, flatten it to shape of (batch*sentence, word, hid_state) to be fit into GRU library
         # Used Numpy style indexing instead of masking
-        return T.reshape(self.W[input], (-1, input.shape[2], self.hid_state_size)) * self.rand_stream.binomial((input.shape[0]*input.shape[1], input.shape[2]), p=1-word_dropout, dtype=theano.config.floatX).dimshuffle((0,1,'x'))
+
+        # 1. Apply an input tensor to word embedding matrix
+        #    and then flatten it to the shape of (batch x sentence, word, hid_state)
+        #    where along the 0-th dimension, the adjacent units are of the same batch
+        embed = T.reshape(self.W[input], (-1, input.shape[2], self.hid_state_size))
+
+        # 2. Binomial mask with size (batch x sentence, word)
+        #    Add an additional dimension to make it with size (batch x sentence, word, 1)
+        #    Thus we can broadcast along the last dimension of 'embed'
+        embed_drop = self.rand_stream.binomial(size=(input.shape[0] * input.shape[1], input.shape[2]),
+                                               p=1 - word_dropout, dtype=theano.config.floatX).dimshuffle((0, 1, 'x'))
+
+        return embed * embed_drop
 
 
 class InputModule(MergeLayer):
@@ -49,7 +63,7 @@ class InputModule(MergeLayer):
         if SemMem is not None:
             self.SemMem = SemMem
         else:
-            self.SemMem = SemMemModule(incomings[0],voc_size,hid_state_size,**kwargs)
+            self.SemMem = SemMemModule(incomings[0], voc_size, hid_state_size, **kwargs)
         if GRU is not None:
             self.GRU = GRU
         else:
@@ -61,24 +75,28 @@ class InputModule(MergeLayer):
         # Because InputModules uses external GRULayer's parameters,
         # We have to notify this information to train the GRU's parameters. 
         return self.GRU.get_params(**tags)
+
     def get_output_shape_for(self, input_shape):
         return (None, None, self.hid_state_size)
+
     def get_output_for(self, inputs, **kwargs):
-        input          = inputs[0]
-        input_word     = T.flatten(inputs[1])
-        word_dropout   = inputs[2]        
+        input = inputs[0]
+        input_word = T.flatten(inputs[1])
+        word_dropout = inputs[2]
         
         # Apply word embedding
+        # With size (batch x sentence, word, emb_dim)
         sentence_rep = self.SemMem.get_output_for([input, word_dropout])
         
         # Apply GRU Layer
+        # 'gru_outs' with size (batch x sentence, word, hid_state_size)
         gru_outs = self.GRU.get_output_for([sentence_rep])
         
         # Extract candidate fact from GRU's output by input_word variable
         # resolving input with adtional word
         # e.g. John when to the hallway nil nil nil -> [GRU1, ... ,GRU8] -> GRU5
         candidate_facts = T.reshape(
-            gru_outs[T.arange(gru_outs.shape[0],dtype='int32'), input_word-1], 
+            gru_outs[T.arange(gru_outs.shape[0], dtype='int32'), input_word-1],
             (-1, input.shape[1], self.hid_state_size))
         return candidate_facts
 
@@ -646,3 +664,8 @@ class DMN(object):
         
         for i in xrange(len(params)):
             params[i].set_value(npy_list[i])
+
+
+
+
+

@@ -2,7 +2,7 @@
 # Python code written by Dong-Sig Han. 2016-01 ~ 2016-02
 import sys
 from glob import glob
-from parseBabiTask import *
+from util import *
 from DMN import DMN
 import time
 import numpy as np
@@ -16,11 +16,24 @@ from lasagne.regularization import regularize_layer_params, l2
 base_dir = 'tasks_1-20_v1-2/en/'
 train_data_path = [glob(base_dir + 'qa' + str(t) + '_*_train.txt')[0] for t in xrange(1, 21)]
 word_dict = dict(nil = 0)
-story, questions, qstory = parseBabiTask(train_data_path, word_dict, 11, 228, False)
+story, questions, qstory = parse_babi_task(data_files=train_data_path, dictionary=word_dict,
+                                           given_max_words=11, given_max_sentences=228,
+                                           include_question=False)
+# Transpose the ndarray for our model
+story = np.transpose(story)
+questions = np.transpose(questions)
+qstory = np.transpose(qstory)
 
 # load testing datasets.
 test_data_path = [glob(base_dir + 'qa' + str(t) + '_*_test.txt')[0] for t in xrange(1, 21)]
-test_story, test_questions, test_qstory = parseBabiTask(test_data_path, word_dict, 11, 228, False)
+test_story, test_questions, test_qstory = parse_babi_task(data_files=test_data_path, dictionary=word_dict,
+                                                          given_max_words=11, given_max_sentences=228,
+                                                          include_question=False)
+# Transpose the ndarray for our model
+test_story = np.transpose(test_story)
+test_questions = np.transpose(test_questions)
+test_qstory = np.transpose(test_qstory)
+
 
 # word_dict['Mary'] -> 0
 # inv_word_dict[0] -> 'Mary'

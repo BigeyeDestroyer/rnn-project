@@ -32,6 +32,7 @@ class SemMemModule(MergeLayer):
     def get_output_for(self, inputs, **kwargs):
         # Core part that actually describes how the theano variables work to produce output
         # input is in shape of (batch, sentence, word)
+        #
         # word_dropout is the varible determines the proportion of words to be masked to 0-vectors
         input = inputs[0]
         word_dropout = inputs[1]
@@ -80,7 +81,10 @@ class InputModule(MergeLayer):
         return (None, None, self.hid_state_size)
 
     def get_output_for(self, inputs, **kwargs):
+        # input with size (batch, sentences, words)
         input = inputs[0]
+        # original size of input_word is (batch, sentences)
+        # input_word with size (batch x sentences, ) after flatten
         input_word = T.flatten(inputs[1])
         word_dropout = inputs[2]
         
@@ -93,37 +97,48 @@ class InputModule(MergeLayer):
         gru_outs = self.GRU.get_output_for([sentence_rep])
         
         # Extract candidate fact from GRU's output by input_word variable
-        # resolving input with adtional word
-        # e.g. John when to the hallway nil nil nil -> [GRU1, ... ,GRU8] -> GRU5
-        candidate_facts = T.reshape(
-            gru_outs[T.arange(gru_outs.shape[0], dtype='int32'), input_word-1],
-            (-1, input.shape[1], self.hid_state_size))
+        # resolving input with additional word
+        # e.g. John went to the hallway nil nil nil -> [GRU1, ... ,GRU8] -> GRU5
+        #
+        # hid_extract with size (batch x sentence, hid_state_size)
+        hid_extract = gru_outs[T.arange(gru_outs.shape[0], dtype='int16'), input_word - 1]
+
+        # candidate_facts with size (batch, sentences, hid_state_size)
+        candidate_facts = T.reshape(x=hid_extract, newshape=(-1, input.shape[1], self.hid_state_size))
         return candidate_facts
 
 
 class QuestionModule(MergeLayer):
-    # Almost same as Input Module, where its sentense's size is one.
+    # Almost same as Input Module, where its sentence's size is one.
     def __init__(self, incomings, voc_size, hid_state_size,
                  SemMem, GRU, **kwargs):
         super(QuestionModule, self).__init__(incomings, **kwargs)
         self.SemMem = SemMem
-        self.GRU    = GRU
+        self.GRU = GRU
         self.voc_size = voc_size
         self.hid_state_size = hid_state_size
+
     def get_output_shape_for(self, input_shape):
         return (None, self.hid_state_size)
-    def get_output_shape_for(self, input_shape):
-        return (None, self.hid_state_size)
+
     def get_output_for(self, inputs, **kwargs):
-        qustion       = inputs[0]
+        # question with size (batch, 1, words)
+        question = inputs[0]
+        # original size of question_word is (batch, 1)
+        # question_word with size (batch, ) after flatten()
         question_word = T.flatten(inputs[1])
-        word_dropout  = inputs[2]
-        
-        q_rep = self.SemMem.get_output_for([qustion, word_dropout])
+        word_dropout = inputs[2]
+
+        # q_rep with size (batch x 1, word, emb_dim)
+        q_rep = self.SemMem.get_output_for([question, word_dropout])
+        # gru_outs with size (batch x 1, word, hid_state_size)
         gru_outs = self.GRU.get_output_for([q_rep])
-        q = T.reshape(
-            gru_outs[T.arange(gru_outs.shape[0],dtype='int32'),question_word-1],
-            (-1, self.hid_state_size))
+
+        # hid_extract with size (batch x 1, hid_state_size)
+        hid_extract = gru_outs[T.arange(gru_outs.shape[0], dtype='int16'), question_word - 1]
+
+        # q with size (batch, hid_state_size)
+        q = T.reshape(x=hid_extract, newshape=(-1, self.hid_state_size))
         return q
 
 
@@ -132,9 +147,9 @@ class GRU_Gate(object):
     # Hint: We have to impelement custom GRU in later Modules. 
     def __init__(self, W_in=Normal(0.1), W_hid=Normal(0.1),
                  b=Constant(0.), nonlinearity=nonlin.sigmoid):
-        self.W_in  = W_in
+        self.W_in = W_in
         self.W_hid = W_hid
-        self.b     = b
+        self.b = b
         if nonlinearity is None:
             self.nonlinearity = nonlin.identity
         else:
@@ -143,8 +158,6 @@ class GRU_Gate(object):
 
 class EpMemModule(MergeLayer):
     # Episodic Memory Module.
-    # This has many varibles and complex operations, 
-    # so it would be very hard to understand(and debug) this implememntation. 
     def __init__(self, incomings, hid_state_size, max_sentence,
                  Wb=GlorotUniform(), W1=GlorotUniform(), W2=GlorotUniform(),
                  b1=Constant(0.), b2=Constant(0,),
@@ -157,10 +170,10 @@ class EpMemModule(MergeLayer):
         # Create parameters for computing gate
         self.Wb = self.add_param(Wb, (1, hid_state_size), name="Wb")
         
-        self.W1 = self.add_param(W2, (1, 9), name="W1")
-        self.W2 = self.add_param(W1, (hid_state_size, 1), name="W2")
-        self.b1 = self.add_param(b2, (hid_state_size,), name="b1", regularizable=False)
-        self.b2 = self.add_param(b1, (1,),   name="b2", regularizable=False)
+        self.W1 = self.add_param(W1, (1, 9), name="W1")
+        self.W2 = self.add_param(W2, (hid_state_size, 1), name="W2")
+        self.b1 = self.add_param(b1, (hid_state_size,), name="b1", regularizable=False)
+        self.b2 = self.add_param(b2, (1,),   name="b2", regularizable=False)
         
         self.max_sentence = max_sentence
         

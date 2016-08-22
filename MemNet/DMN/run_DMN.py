@@ -34,10 +34,10 @@ test_story = np.transpose(test_story)
 test_questions = np.transpose(test_questions)
 test_qstory = np.transpose(test_qstory)
 
-
 # word_dict['Mary'] -> 0
 # inv_word_dict[0] -> 'Mary'
 inv_word_dict = {v: k for k, v in word_dict.items()}
+
 
 def get_word_size(sentence):
     return np.count_nonzero(sentence)
@@ -50,7 +50,7 @@ test_qstory_word = np.zeros(test_qstory.shape[0:1], np.int32)
 
 for i in xrange(story_word.shape[0]):
     for j in xrange(story_word.shape[1]):
-        story_word[i, j]= get_word_size(story[i, j])
+        story_word[i, j] = get_word_size(story[i, j])
 for i in xrange(qstory_word.shape[0]):
     qstory_word[i]= get_word_size(qstory[i])
 for i in xrange(test_story_word.shape[0]):

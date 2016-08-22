@@ -38,25 +38,24 @@ This folder is specially for the memory network.
 
 ### Works to recover
 1. Dynamic Memory Network
-	- python [code][19]
-
-
+	- python [code][19], 32 star, 9 folk
+	- python [code][20], 154 star, 43 folk
 
 ### Works recovered
 1. End-to-end
-	- [tensorflow][20]
-	- [python][21]
+	- [tensorflow][21]
+	- [python][22]
 	- on **bigeye7**
 
 ### Faculty
-- [Marco Zorzi][22]
-	- [Learning Orthographic Structure With Sequential Generative Neural Networks][23]
+- [Marco Zorzi][23]
+	- [Learning Orthographic Structure With Sequential Generative Neural Networks][24]
 	- **Pay attention** to this project: **GENMOD**
-	- [EuroScience Open Forum 2016][24]: July 26
+	- [EuroScience Open Forum 2016][25]: July 26
 
 ### Ideas
 - 2016.8.21
-	- About MemN2N. Actually the attention used here is on **sentence level**, what if we detail it into **phrase level**? Such as the recently proposed **structure attention work**.  
+	- About MemN2N. Actually the attention used here is on **sentence level**, what if we detail it into **phrase level**? Such as the recently proposed **structure attention work**.
 
 
 
@@ -86,8 +85,9 @@ This folder is specially for the memory network.
 [17]:	http://arxiv.org/abs/1603.01417
 [18]:	http://arxiv.org/abs/1605.09128
 [19]:	https://github.com/swstarlab/DynamicMemoryNetworks
-[20]:	https://github.com/carpedm20/MemN2N-tensorflow
-[21]:	https://github.com/vinhkhuc/MemN2N-babi-python
-[22]:	https://scholar.google.com/citations?hl=zh-CN&user=MgF3uIMAAAAJ&view_op=list_works&sortby=pubdate
-[23]:	http://s3.amazonaws.com/academia.edu.documents/42328867/Learning_Orthographic_Structure_With_Seq20160207-26129-1rlm2pc.pdf?AWSAccessKeyId=AKIAJ56TQJRTWSMTNPEA&Expires=1468932324&Signature=daiAMmhswxs4FH6URXaOBLqBR5g%3D&response-content-disposition=inline%3B%20filename%3DLearning_Orthographic_Structure_With_Seq.pdf
-[24]:	http://www.esof.eu/
+[20]:	https://github.com/YerevaNN/Dynamic-memory-networks-in-Theano
+[21]:	https://github.com/carpedm20/MemN2N-tensorflow
+[22]:	https://github.com/vinhkhuc/MemN2N-babi-python
+[23]:	https://scholar.google.com/citations?hl=zh-CN&user=MgF3uIMAAAAJ&view_op=list_works&sortby=pubdate
+[24]:	http://s3.amazonaws.com/academia.edu.documents/42328867/Learning_Orthographic_Structure_With_Seq20160207-26129-1rlm2pc.pdf?AWSAccessKeyId=AKIAJ56TQJRTWSMTNPEA&Expires=1468932324&Signature=daiAMmhswxs4FH6URXaOBLqBR5g%3D&response-content-disposition=inline%3B%20filename%3DLearning_Orthographic_Structure_With_Seq.pdf
+[25]:	http://www.esof.eu/

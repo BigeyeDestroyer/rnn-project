@@ -3,12 +3,13 @@ import theano
 import theano.tensor as T 
 import lasagne
 import lasagne.nonlinearities as nonlin
-from   lasagne.init   import Normal, Constant, GlorotUniform
-from   lasagne.layers import Layer, MergeLayer, InputLayer, GRULayer
-from   theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
+from lasagne.init import Normal, Constant, GlorotUniform
+from lasagne.layers import Layer, MergeLayer, InputLayer, GRULayer
+from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 from itertools import chain
 from six.moves import cPickle as pickle
 import h5py
+
 
 class SemMemModule(MergeLayer):
     # Semantic Memory Module (= Word Embedding Layer)
@@ -80,7 +81,8 @@ class InputModule(MergeLayer):
             gru_outs[T.arange(gru_outs.shape[0],dtype='int32'), input_word-1], 
             (-1, input.shape[1], self.hid_state_size))
         return candidate_facts
-           
+
+
 class QuestionModule(MergeLayer):
     # Almost same as Input Module, where its sentense's size is one.
     def __init__(self, incomings, voc_size, hid_state_size,
@@ -105,7 +107,8 @@ class QuestionModule(MergeLayer):
             gru_outs[T.arange(gru_outs.shape[0],dtype='int32'),question_word-1],
             (-1, self.hid_state_size))
         return q
-    
+
+
 class GRU_Gate(object):
     # Helper function of GRU (modified in lasagne library)
     # Hint: We have to impelement custom GRU in later Modules. 
@@ -118,6 +121,7 @@ class GRU_Gate(object):
             self.nonlinearity = nonlin.identity
         else:
             self.nonlinearity = nonlinearity
+
 
 class EpMemModule(MergeLayer):
     # Episodic Memory Module.
@@ -273,6 +277,7 @@ class EpMemModule(MergeLayer):
             hid = step(hid)
       
         return hid
+
 
 class EpGateOut(MergeLayer):
     # This is passive layer shares parameters of EpMemModule, JUST FOR GATE ACTIVATION (SOFTMAX) TRAINING.
@@ -504,6 +509,7 @@ class AnswerModule(MergeLayer):
 
         return T.transpose(hid_and_out[1], (1,0,2))
 
+
 class DMN(object):
     def __init__(self, config, word_dict):
         self.config = config
@@ -640,8 +646,3 @@ class DMN(object):
         
         for i in xrange(len(params)):
             params[i].set_value(npy_list[i])
-        
-        
-        
-        
-        

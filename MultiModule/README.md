@@ -36,6 +36,9 @@ This folder is for multi-module learning. Not only for proposal writing, but als
 		- [Show and tell: A neural image caption generator][19], 442 cited
 		- [Show, attend and tell: Neural image caption generation with visual attention][20], 306 cited
 
+### Ideas
+- About modality fusion: we can make use of **RL** to let the model itself determine **at which level the features from different modalities are fused**. 
+
 
 
 

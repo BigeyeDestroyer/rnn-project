@@ -67,6 +67,12 @@ This folder is for attention related works.
 
 17. [Attention-over-Attention Neural Networks for Reading Comprehension][23]
 
+### Recent Works
+- [Automatic Description Generation from Images: A Survey of Models, Datasets, and Evaluation Measures][24]
+	- survey 
+- [Modeling Human Reading with Neural Attention][25]
+
+
 
 [1]:	http://arxiv.org/abs/1603.08575
 [2]:	http://arxiv.org/abs/1603.03101
@@ -91,3 +97,5 @@ This folder is for attention related works.
 [21]:	http://arxiv.org/abs/1406.6247
 [22]:	http://incompleteideas.net/sutton/williams-92.pdf
 [23]:	http://arxiv.org/abs/1607.04423
+[24]:	http://www.jair.org/media/4900/live-4900-9139-jair.pdf
+[25]:	http://arxiv.org/abs/1608.05604

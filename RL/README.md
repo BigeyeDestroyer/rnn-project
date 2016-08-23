@@ -113,6 +113,13 @@ This folder is for resources related to reinforcemnet learning.
 	- **Reduce sample complexity** of **deep reinforcement learning** 
 	- Work from **GoogleDeepmind**
 
+### Faculty 
+- [Itamar Arel][51]: 1497
+- [Pieter Abbeel][52]: 6732
+- [Sridhar Mahadevan][53]: 6381
+- [Satinder Singh][54]: 23456
+- [Juergen Schmidhuber][55]: 19399
+
 [1]:	https://github.com/BigeyeDestroyer/deepRL/tree/resource
 [2]:	http://mnemstudio.org/path-finding-q-learning-tutorial.htm
 [3]:	http://www.infoq.com/cn/articles/atari-reinforcement-learning
@@ -163,3 +170,8 @@ This folder is for resources related to reinforcemnet learning.
 [48]:	http://arxiv.org/abs/1604.00923
 [49]:	http://arxiv.org/abs/1603.01840
 [50]:	http://arxiv.org/abs/1603.00748
+[51]:	https://scholar.google.com/citations?user=wivIgKkAAAAJ&hl=zh-CN
+[52]:	https://scholar.google.com/citations?hl=zh-CN&user=vtwH6GkAAAAJ&view_op=list_works&sortby=pubdate
+[53]:	https://scholar.google.com/citations?hl=zh-CN&user=xTj2eQwAAAAJ&view_op=list_works&sortby=pubdate
+[54]:	https://scholar.google.com/citations?user=q92q8SMAAAAJ&hl=zh-CN
+[55]:	https://scholar.google.com/citations?hl=zh-CN&user=gLnCTgIAAAAJ&view_op=list_works&sortby=pubdate

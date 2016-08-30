@@ -56,6 +56,11 @@ This folder is specially for the memory network.
 ### Ideas
 - 2016.8.21
 	- About MemN2N. Actually the attention used here is on **sentence level**, what if we detail it into **phrase level**? Such as the recently proposed **structure attention work**.
+- 2016.8.30
+	- About the attention model: what about a mask directly connect the question and the final answer. For example, consider the following two questions:
+		- **What** kind of tree is it?
+		- **Where** is the tree? 
+		- Thus, given **where**, we should select those position-related words; given **what**, we should select those class-related words.
 
 
 

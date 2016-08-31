@@ -70,12 +70,13 @@ This folder is for attention related works.
 18. [Stacked Attention Networks for Image Question Answering][24]
 	- 28 cited, 11.7 2015, arxiv
 
-
+19. [Neural Machine Translation with Recurrent Attention Modeling][25]
+	- 7.18 2016 arxiv
 
 ### Recent Works
-- [Automatic Description Generation from Images: A Survey of Models, Datasets, and Evaluation Measures][25]
+- [Automatic Description Generation from Images: A Survey of Models, Datasets, and Evaluation Measures][26]
 	- survey
-- [Modeling Human Reading with Neural Attention][26]
+- [Modeling Human Reading with Neural Attention][27]
 
 
 
@@ -103,5 +104,6 @@ This folder is for attention related works.
 [22]:	http://incompleteideas.net/sutton/williams-92.pdf
 [23]:	http://arxiv.org/abs/1607.04423
 [24]:	http://arxiv.org/abs/1511.02274
-[25]:	http://www.jair.org/media/4900/live-4900-9139-jair.pdf
-[26]:	http://arxiv.org/abs/1608.05604
+[25]:	http://arxiv.org/abs/1607.05108
+[26]:	http://www.jair.org/media/4900/live-4900-9139-jair.pdf
+[27]:	http://arxiv.org/abs/1608.05604

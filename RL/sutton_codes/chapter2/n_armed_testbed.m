@@ -49,61 +49,63 @@ cumReward    = zeros(length(epsArray), nP);
 cumProb      = zeros(length(epsArray), nP);
 
 for ei = 1 : length(epsArray)
-  tEps = epsArray(ei); % epsilon for current 'epsilon-greedy'
+    display(['Epsilon greedy: epsilon = ', num2str(epsArray(ei))]);
+    tEps = epsArray(ei); % epsilon for current 'epsilon-greedy'
 
   
-  % qT : nB x nA, estimation of mean for each arm in every bandit
-  % qN : nB x nA, number of draws for each arm in every bandit 
-  % qS : nB x nA, total rewards for each arm in every bandit 
-  % 
-  % qT = qT0;  % <- initialize to one draw per arm 
-  qT = zeros(size(qT0));  % <- initialize to zero draws per arm (no knowledge)
-  qN = ones(nB, nA); % keep track of the number draws on this arm 
-  qS = qT;             % keep track of the SUM of the rewards (qT = qS./qN) 
+    % qT : nB x nA, estimation of mean for each arm in every bandit
+    % qN : nB x nA, number of draws for each arm in every bandit 
+    % qS : nB x nA, total rewards for each arm in every bandit 
+    % 
+    % qT = qT0;  % <- initialize to one draw per arm 
+    qT = zeros(size(qT0));  % <- initialize to zero draws per arm (no knowledge)
+    qN = ones(nB, nA); % keep track of the number draws on this arm 
+    qS = qT;             % keep track of the SUM of the rewards (qT = qS./qN) 
   
-  % allRewards      : nB x nP, all rewards for each bandit during every play
-  % pickedMaxAction : nB x nP, picked action for each bandit in all plays
-  allRewards      = zeros(nB,nP); 
-  pickedMaxAction = zeros(nB,nP); 
-  for bi = 1: nB % pick a bandit
-    for pi = 1: nP % make a play
-      % determine if this move is exploritory or greedy: 
-      if(rand(1) <= tEps) % pick a RANDOM arm: 
-        [~, arm] = histc(rand(1), linspace(0, 1 + eps, nA + 1));
-      else                  % pick the GREEDY arm:
-        [~, arm] = max(qT(bi, :));
-      end
-      % determine if the arm selected is the best possible: 
-      [~, bestArm] = max(qStarMeans(bi, :)); 
-      if(arm == bestArm)
-          pickedMaxAction(bi,pi) = 1; 
-      end
-      % get the reward from drawing on that arm: 
-      reward = qStarMeans(bi, arm) + sigma * randn(1); 
-      allRewards(bi, pi) = reward; 
-      % update qN,qS,qT: 
-      qN(bi, arm) = qN(bi, arm) + 1;
-      qS(bi, arm) = qS(bi, arm) + reward; 
-      qT(bi, arm) = qS(bi, arm) / qN(bi, arm); 
+    % allRewards      : nB x nP, all rewards for each bandit during every play
+    % pickedMaxAction : nB x nP, picked action for each bandit in all plays
+    allRewards      = zeros(nB,nP); 
+    pickedMaxAction = zeros(nB,nP); 
+    for bi = 1: nB % pick a bandit
+        display(['Pick the ', num2str(bi), '-th bandit ...']);
+        for pi = 1: nP % make a play
+            % determine if this move is exploritory or greedy: 
+            if(rand(1) <= tEps) % pick a RANDOM arm: 
+                [~, arm] = histc(rand(1), linspace(0, 1 + eps, nA + 1));
+            else                  % pick the GREEDY arm:
+                [~, arm] = max(qT(bi, :));
+            end
+            % determine if the arm selected is the best possible:
+            [~, bestArm] = max(qStarMeans(bi, :)); 
+            if(arm == bestArm)
+                pickedMaxAction(bi,pi) = 1; 
+            end
+            % get the reward from drawing on that arm:
+            reward = qStarMeans(bi, arm) + sigma * randn(1); 
+            allRewards(bi, pi) = reward; 
+            % update qN,qS,qT: 
+            qN(bi, arm) = qN(bi, arm) + 1;
+            qS(bi, arm) = qS(bi, arm) + reward; 
+            qT(bi, arm) = qS(bi, arm) / qN(bi, arm); 
+        end
     end
-  end
-  % 1. average rewards across among all bandits 
-  avgRew = mean(allRewards, 1); % 1 x nP, average across all bandits
-  avgReward(ei, :) = avgRew(:).'; % length(epsArray) x nP 
+    % 1. average rewards across among all bandits 
+    avgRew = mean(allRewards, 1); % 1 x nP, average across all bandits
+    avgReward(ei, :) = avgRew(:).'; % length(epsArray) x nP 
   
-  % 2. average optimal action selected among all the bandits
-  percentOptAction = mean(pickedMaxAction, 1); % 1 x nP
-  perOptAction(ei, :) = percentOptAction(:).'; % length(epsArray) x nP
+    % 2. average optimal action selected among all the bandits
+    percentOptAction = mean(pickedMaxAction, 1); % 1 x nP
+    perOptAction(ei, :) = percentOptAction(:).'; % length(epsArray) x nP
   
-  % 3. cumsum rewards for all the plays
-  csAR = cumsum(allRewards, 2); % do a cummulative sum across plays for each bandit
-  csRew = mean(csAR, 1);
-  cumReward(ei, :) = csRew(:).'; 
+    % 3. cumsum rewards for all the plays
+    csAR = cumsum(allRewards, 2); % do a cummulative sum across plays for each bandit
+    csRew = mean(csAR, 1);
+    cumReward(ei, :) = csRew(:).'; 
   
-  % 4. cumsum optimal action selected for all plays
-  csPA = cumsum(pickedMaxAction, 2) ./ cumsum(ones(size(pickedMaxAction)), 2);
-  csProb = mean(csPA, 1);
-  cumProb(ei, :) = csProb(:).';
+    % 4. cumsum optimal action selected for all plays
+    csPA = cumsum(pickedMaxAction, 2) ./ cumsum(ones(size(pickedMaxAction)), 2);
+    csProb = mean(csPA, 1);
+    cumProb(ei, :) = csProb(:).';
 end
 
 % produce the average rewards plot: 

@@ -1,4 +1,4 @@
-### Introduction 
+### Introduction
 This folder is for multi-module learning. Not only for proposal writing, but also for the project with Germany. 
 
 ### [ICML2016][1]
@@ -28,7 +28,7 @@ This folder is for multi-module learning. Not only for proposal writing, but als
 - [Improved multimodal deep learning with variation of information][15]
 	- NIPS2014, 22 cited
 - [Multimodal sparse representation learning and applications][16]
-	- arxiv, Nov 2015, 
+	- arxiv, Nov 2015,
 - [Deep fragment embeddings for bidirectional image sentence mapping][17]
 	- NIPS2014, 130 cited
 	- Image Caption related
@@ -37,7 +37,10 @@ This folder is for multi-module learning. Not only for proposal writing, but als
 		- [Show, attend and tell: Neural image caption generation with visual attention][20], 306 cited
 
 ### Ideas
-- About modality fusion: we can make use of **RL** to let the model itself determine **at which level the features from different modalities are fused**. 
+- About modality fusion: we can make use of **RL** to let the model itself determine **at which level the features from different modalities are fused**.
+- 老板的考虑：
+	- 融合图像与音频，相互之间的作用
+	- 数据不足时从其他途径补充，用来增强模型的能力：比如我们要识别药品，但是可以从训练其他类型瓶子开始，捕捉到类似的特征，然后在小数据集上做类似于fine tune的工作
 
 
 

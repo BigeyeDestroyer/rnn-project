@@ -54,11 +54,12 @@ def prepare_data(caps, features, worddict, maxlen=None, n_words=10000, zero_pad=
 
     return x, x_mask, y
 
+
 def load_data(load_train=True, load_dev=True, load_test=True, path='./'):
     ''' Loads the dataset
 
     :type dataset: string
-    :param dataset: the path to the dataset (here IMDB)
+    :param dataset: the path to the dataset
     '''
 
     #############

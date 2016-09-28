@@ -58,6 +58,7 @@ def gen_model(queue, rqueue, pid, model, options, k, normalize, word_idict, samp
 
     return 
 
+
 def main(model, saveto, k=5, normalize=False, zero_pad=False, n_process=5, datasets='dev,test', sampling=False, pkl_name=None):
     # load model model_options
     if pkl_name is None:

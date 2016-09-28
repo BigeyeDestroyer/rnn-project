@@ -53,10 +53,12 @@ variable dictionary and a regular numpy
 dictionary
 '''
 
+
 # push parameters to Theano shared variables
 def zipp(params, tparams):
     for kk, vv in params.iteritems():
         tparams[kk].set_value(vv)
+
 
 # pull parameters from Theano shared variables
 def unzip(zipped):
@@ -65,9 +67,11 @@ def unzip(zipped):
         new_params[kk] = vv.get_value()
     return new_params
 
+
 # get the list of parameters: Note that tparams must be OrderedDict
 def itemlist(tparams):
     return [vv for kk, vv in tparams.iteritems()]
+
 
 # dropout in theano
 def dropout_layer(state_before, use_noise, trng):
@@ -84,9 +88,11 @@ def dropout_layer(state_before, use_noise, trng):
                          state_before * 0.5)
     return proj
 
+
 # make prefix-appended name
 def _p(pp, name):
     return '%s_%s' % (pp, name)
+
 
 # initialize Theano shared variables according to the initial parameters
 def init_tparams(params):
@@ -94,6 +100,7 @@ def init_tparams(params):
     for kk, pp in params.iteritems():
         tparams[kk] = theano.shared(params[kk], name=kk)
     return tparams
+
 
 # load parameters
 def load_params(path, params):
@@ -104,6 +111,7 @@ def load_params(path, params):
         params[kk] = pp[kk]
 
     return params
+
 
 # some utilities
 def ortho_weight(ndim):
@@ -116,10 +124,11 @@ def ortho_weight(ndim):
     # of rows, V has the same # of cols)
     """
     W = numpy.random.randn(ndim, ndim)
-    u, _, _ = numpy.linalg.svd(W)
+    u, _, _ = numpy.linalg.svd(W)  # rows of 'u' are orthogonal
     return u.astype('float32')
 
-def norm_weight(nin,nout=None, scale=0.01, ortho=True):
+
+def norm_weight(nin, nout=None, scale=0.01, ortho=True):
     """
     Random weights drawn from a Gaussian
     """
@@ -131,12 +140,15 @@ def norm_weight(nin,nout=None, scale=0.01, ortho=True):
         W = scale * numpy.random.randn(nin, nout)
     return W.astype('float32')
 
+
 # some useful shorthands
 def tanh(x):
     return tensor.tanh(x)
 
+
 def rectifier(x):
     return tensor.maximum(0., x)
+
 
 def linear(x):
     return x
@@ -160,9 +172,16 @@ layers = {'ff': ('param_init_fflayer', 'fflayer'),
           'lstm_cond': ('param_init_lstm_cond', 'lstm_cond_layer'),
           }
 
+
 def get_layer(name):
+    """
+    :param name: 'ff', 'lstm' or 'lstm_cond'
+    :return:
+    fns[0]: the parameter initializer
+    fns[1]: fprop
+    """
     fns = layers[name]
-    return (eval(fns[0]), eval(fns[1]))
+    return eval(fns[0]), eval(fns[1])
 
 
 # feedforward layer: affine transformation + point-wise nonlinearity
@@ -172,12 +191,14 @@ def param_init_fflayer(options, params, prefix='ff', nin=None, nout=None):
     if nout is None:
         nout = options['dim_proj']
     params[_p(prefix, 'W')] = norm_weight(nin, nout, scale=0.01)
-    params[_p(prefix, 'b')] = numpy.zeros((nout,)).astype('float32')
+    params[_p(prefix, 'b')] = numpy.zeros((nout, )).astype('float32')
 
     return params
 
+
 def fflayer(tparams, state_below, options, prefix='rconv', activ='lambda x: tensor.tanh(x)', **kwargs):
-    return eval(activ)(tensor.dot(state_below, tparams[_p(prefix,'W')])+tparams[_p(prefix,'b')])
+    return eval(activ)(tensor.dot(state_below, tparams[_p(prefix, 'W')]) + tparams[_p(prefix, 'b')])
+
 
 # LSTM layer
 def param_init_lstm(options, params, prefix='lstm', nin=None, dim=None):
@@ -190,25 +211,32 @@ def param_init_lstm(options, params, prefix='lstm', nin=None, dim=None):
      for much cleaner code and slightly faster dot-prods
     """
     # input weights
-    W = numpy.concatenate([norm_weight(nin,dim),
-                           norm_weight(nin,dim),
-                           norm_weight(nin,dim),
-                           norm_weight(nin,dim)], axis=1)
-    params[_p(prefix,'W')] = W
+    W = numpy.concatenate([norm_weight(nin, dim),
+                           norm_weight(nin, dim),
+                           norm_weight(nin, dim),
+                           norm_weight(nin, dim)], axis=1)
+    params[_p(prefix, 'W')] = W
     # for the previous hidden activation
     U = numpy.concatenate([ortho_weight(dim),
                            ortho_weight(dim),
                            ortho_weight(dim),
                            ortho_weight(dim)], axis=1)
-    params[_p(prefix,'U')] = U
-    params[_p(prefix,'b')] = numpy.zeros((4 * dim,)).astype('float32')
+    params[_p(prefix, 'U')] = U
+    params[_p(prefix, 'b')] = numpy.zeros((4 * dim, )).astype('float32')
 
     return params
 
+
 # This function implements the lstm fprop
 def lstm_layer(tparams, state_below, options, prefix='lstm', mask=None, **kwargs):
-    nsteps = state_below.shape[0]
-    dim = tparams[_p(prefix,'U')].shape[0]
+    """
+    :param state_below: a 3D or 2D tensor, mostly a 3D one
+                        (nsteps, batch, in_dim)
+    :param mask: mostly a 2D one, with size (nsteps, batch
+
+    """
+    nsteps = state_below.shape[0]  # the first dimension should be number of time steps
+    dim = tparams[_p(prefix, 'U')].shape[0]  # dimension of the hidden state
 
     # if we are dealing with a mini-batch
     if state_below.ndim == 3:
@@ -222,40 +250,62 @@ def lstm_layer(tparams, state_below, options, prefix='lstm', mask=None, **kwargs
         init_memory = tensor.alloc(0., dim)
 
     # if we have no mask, we assume all the inputs are valid
-    if mask == None:
+    if mask is None:
         mask = tensor.alloc(1., state_below.shape[0], 1)
 
     # use the slice to calculate all the different gates
     def _slice(_x, n, dim):
         if _x.ndim == 3:
-            return _x[:, :, n*dim:(n+1)*dim]
+            return _x[:, :, n * dim: (n + 1) * dim]
         elif _x.ndim == 2:
-            return _x[:, n*dim:(n+1)*dim]
-        return _x[n*dim:(n+1)*dim]
+            return _x[:, n * dim: (n + 1) * dim]
+        return _x[n * dim: (n + 1) * dim]
 
-    # one time step of the lstm
-    def _step(m_, x_, h_, c_):
-        preact = tensor.dot(h_, tparams[_p(prefix, 'U')])
-        preact += x_
+    def _step(x_t, m_t, c_tm1, h_tm1):
+        """
+        This function computes one step evolution in LSTM
+
+        Parameters
+        ----------
+        :type m_t: (n_samples, )
+        :param m_t: mask
+
+        :type x_t: (n_samples, in_size)
+        :param x_t: input at time t
+
+        :type c_tm1: (n_samples, hid_size)
+        :param c_tm1: cell state at time (t - 1)
+
+        :type h_tm1: (n_samples, hid_size)
+        :param h_tm1: hidden state at time (t - 1)
+        """
+        preact = tensor.dot(x_t, tparams[_p(prefix, 'W')]) + \
+                 tensor.dot(h_tm1, tparams[_p(prefix, 'U')]) + \
+                 tparams[_p(prefix, 'b')]
 
         i = tensor.nnet.sigmoid(_slice(preact, 0, dim))
         f = tensor.nnet.sigmoid(_slice(preact, 1, dim))
         o = tensor.nnet.sigmoid(_slice(preact, 2, dim))
-        c = tensor.tanh(_slice(preact, 3, dim))
+        c_tilde = tensor.tanh(_slice(preact, 3, dim))
 
-        c = f * c_ + i * c
-        h = o * tensor.tanh(c)
+        c_t = f * c_tm1 + i * c_tilde
 
-        return h, c, i, f, o, preact
+        # consider the mask
+        c_t = m_t[:, None] * c_t + (1. - m_t)[:, None] * c_tm1
+        h_t = o * tensor.tanh(c_t)
 
-    state_below = tensor.dot(state_below, tparams[_p(prefix, 'W')]) + tparams[_p(prefix, 'b')]
+        # consider the mask
+        h_t = m_t[:, None] * h_t + (1. - m_t)[:, None] * h_tm1
 
-    rval, updates = theano.scan(_step,
-                                sequences=[mask, state_below],
-                                outputs_info=[init_state, init_memory, None, None, None, None],
+        return c_t, h_t
+
+    rval, updates = theano.scan(fn=_step,
+                                sequences=[state_below, mask],
+                                outputs_info=[init_memory, init_state],
                                 name=_p(prefix, '_layers'),
                                 n_steps=nsteps, profile=False)
     return rval
+
 
 # Conditional LSTM layer with Attention
 def param_init_lstm_cond(options, params, prefix='lstm_cond', nin=None, dim=None, dimctx=None):
@@ -267,47 +317,47 @@ def param_init_lstm_cond(options, params, prefix='lstm_cond', nin=None, dim=None
         dimctx = options['dim']
     # input to LSTM, similar to the above, we stack the matricies for compactness, do one
     # dot product, and use the slice function below to get the activations for each "gate"
-    W = numpy.concatenate([norm_weight(nin,dim),
-                           norm_weight(nin,dim),
-                           norm_weight(nin,dim),
-                           norm_weight(nin,dim)], axis=1)
-    params[_p(prefix,'W')] = W
+    W = numpy.concatenate([norm_weight(nin, dim),
+                           norm_weight(nin, dim),
+                           norm_weight(nin, dim),
+                           norm_weight(nin, dim)], axis=1)
+    params[_p(prefix, 'W')] = W
 
     # LSTM to LSTM
     U = numpy.concatenate([ortho_weight(dim),
                            ortho_weight(dim),
                            ortho_weight(dim),
                            ortho_weight(dim)], axis=1)
-    params[_p(prefix,'U')] = U
+    params[_p(prefix, 'U')] = U
 
     # bias to LSTM
-    params[_p(prefix,'b')] = numpy.zeros((4 * dim,)).astype('float32')
+    params[_p(prefix, 'b')] = numpy.zeros((4 * dim, )).astype('float32')
 
     # context to LSTM
-    Wc = norm_weight(dimctx,dim*4)
-    params[_p(prefix,'Wc')] = Wc
+    Wc = norm_weight(dimctx, dim * 4)
+    params[_p(prefix, 'Wc')] = Wc
 
     # attention: context -> hidden
     Wc_att = norm_weight(dimctx, ortho=False)
-    params[_p(prefix,'Wc_att')] = Wc_att
+    params[_p(prefix, 'Wc_att')] = Wc_att
 
     # attention: LSTM -> hidden
-    Wd_att = norm_weight(dim,dimctx)
-    params[_p(prefix,'Wd_att')] = Wd_att
+    Wd_att = norm_weight(dim, dimctx)
+    params[_p(prefix, 'Wd_att')] = Wd_att
 
     # attention: hidden bias
     b_att = numpy.zeros((dimctx,)).astype('float32')
-    params[_p(prefix,'b_att')] = b_att
+    params[_p(prefix, 'b_att')] = b_att
 
     # optional "deep" attention
     if options['n_layers_att'] > 1:
         for lidx in xrange(1, options['n_layers_att']):
-            params[_p(prefix,'W_att_%d'%lidx)] = ortho_weight(dimctx)
-            params[_p(prefix,'b_att_%d'%lidx)] = numpy.zeros((dimctx,)).astype('float32')
+            params[_p(prefix,'W_att_%d' % lidx)] = ortho_weight(dimctx)
+            params[_p(prefix,'b_att_%d' % lidx)] = numpy.zeros((dimctx,)).astype('float32')
 
     # attention:
-    U_att = norm_weight(dimctx,1)
-    params[_p(prefix,'U_att')] = U_att
+    U_att = norm_weight(dimctx, 1)
+    params[_p(prefix, 'U_att')] = U_att
     c_att = numpy.zeros((1,)).astype('float32')
     params[_p(prefix, 'c_tt')] = c_att
 
@@ -320,11 +370,19 @@ def param_init_lstm_cond(options, params, prefix='lstm_cond', nin=None, dim=None
 
     return params
 
+
 def lstm_cond_layer(tparams, state_below, options, prefix='lstm',
                     mask=None, context=None, one_step=False,
                     init_memory=None, init_state=None,
                     trng=None, use_noise=None, sampling=True,
                     argmax=False, **kwargs):
+    """
+    :param context: assume that 'context' with size
+                    (batch, L, ctxdim)
+    :param sampling: for stochastic attention, whether to
+                     sample the attention or make use of the
+                     expected one with maximum probability
+    """
 
     assert context, 'Context must be provided'
 
@@ -353,16 +411,16 @@ def lstm_cond_layer(tparams, state_below, options, prefix='lstm',
         init_memory = tensor.alloc(0., n_samples, dim)
 
     # projected context
-    pctx_ = tensor.dot(context, tparams[_p(prefix,'Wc_att')]) + tparams[_p(prefix, 'b_att')]
+    pctx_ = tensor.dot(context, tparams[_p(prefix, 'Wc_att')]) + tparams[_p(prefix, 'b_att')]
     if options['n_layers_att'] > 1:
         for lidx in xrange(1, options['n_layers_att']):
-            pctx_ = tensor.dot(pctx_, tparams[_p(prefix,'W_att_%d'%lidx)])+tparams[_p(prefix, 'b_att_%d'%lidx)]
+            pctx_ = tensor.dot(pctx_, tparams[_p(prefix, 'W_att_%d'%lidx)]) + tparams[_p(prefix, 'b_att_%d' % lidx)]
             # note to self: this used to be options['n_layers_att'] - 1, so no extra non-linearity if n_layers_att < 3
             if lidx < options['n_layers_att']:
                 pctx_ = tanh(pctx_)
 
     # projected x
-    # state_below is timesteps*num samples by d in training (TODO change to notation of paper)
+    # state_below is timesteps * num samples by d in training (TODO change to notation of paper)
     # this is n * d during sampling
     state_below = tensor.dot(state_below, tparams[_p(prefix, 'W')]) + tparams[_p(prefix, 'b')]
 
@@ -377,8 +435,8 @@ def lstm_cond_layer(tparams, state_below, options, prefix='lstm',
 
     def _slice(_x, n, dim):
         if _x.ndim == 3:
-            return _x[:, :, n*dim:(n+1)*dim]
-        return _x[:, n*dim:(n+1)*dim]
+            return _x[:, :, n * dim: (n + 1) * dim]
+        return _x[:, n * dim: (n + 1) * dim]
 
     def _step(m_, x_, h_, c_, a_, as_, ct_, pctx_, dp_=None, dp_att_=None):
         """ Each variable is one time slice of the LSTM
@@ -389,37 +447,53 @@ def lstm_cond_layer(tparams, state_below, options, prefix='lstm',
         # attention computation
         # [described in  equations (4), (5), (6) in
         # section "3.1.2 Decoder: Long Short Term Memory Network]
-        pstate_ = tensor.dot(h_, tparams[_p(prefix,'Wd_att')])
-        pctx_ = pctx_ + pstate_[:,None,:]
+        # h_ with size (batch, hid_size)
+        # pstate_ with size (batch, ctxdim)
+        # pctx_ with size (batch, L, ctxdim)
+        pstate_ = tensor.dot(h_, tparams[_p(prefix, 'Wd_att')])
+
+        # Here, pctx_ is with size (batch, L, ctxdim)
+        pctx_ = pctx_ + pstate_[:, None, :]
+        # Not really understand this strange list
         pctx_list = []
         pctx_list.append(pctx_)
         pctx_ = tanh(pctx_)
-        alpha = tensor.dot(pctx_, tparams[_p(prefix,'U_att')])+tparams[_p(prefix, 'c_tt')]
+        # alpha is a list containing one array
+        # the array is with size (batch, L)
+        alpha = tensor.dot(pctx_, tparams[_p(prefix, 'U_att')]) + tparams[_p(prefix, 'c_tt')]
         alpha_pre = alpha
         alpha_shp = alpha.shape
 
         if options['attn_type'] == 'deterministic':
-            alpha = tensor.nnet.softmax(alpha.reshape([alpha_shp[0],alpha_shp[1]])) # softmax
-            ctx_ = (context * alpha[:,:,None]).sum(1) # current context
-            alpha_sample = alpha # you can return something else reasonable here to debug
+            # alpha is with size (batch, L)
+            alpha = tensor.nnet.softmax(alpha.reshape([alpha_shp[0], alpha_shp[1]]))  # softmax
+            # context is with size (batch, L, ctxdim)
+            # ctx_ is with size (batch, ctxdim)
+            ctx_ = (context * alpha[:, :, None]).sum(1)  # current context
+            alpha_sample = alpha  # you can return something else reasonable here to debug
         else:
-            alpha = tensor.nnet.softmax(temperature_c*alpha.reshape([alpha_shp[0],alpha_shp[1]])) # softmax
+            alpha = tensor.nnet.softmax(temperature_c * alpha.reshape([alpha_shp[0], alpha_shp[1]]))  # softmax
             # TODO return alpha_sample
             if sampling:
-                alpha_sample = h_sampling_mask * trng.multinomial(pvals=alpha,dtype=theano.config.floatX)\
-                               + (1.-h_sampling_mask) * alpha
+                # Here, alpha_sample still with size (batch, L)
+                # each row a one-hot vector indicating attention
+                alpha_sample = h_sampling_mask * trng.multinomial(pvals=alpha, dtype=theano.config.floatX)\
+                               + (1. - h_sampling_mask) * alpha
             else:
                 if argmax:
-                    alpha_sample = tensor.cast(tensor.eq(tensor.arange(alpha_shp[1])[None,:],
-                                               tensor.argmax(alpha,axis=1,keepdims=True)), theano.config.floatX)
+                    alpha_sample = tensor.cast(tensor.eq(tensor.arange(alpha_shp[1])[None, :],
+                                               tensor.argmax(alpha, axis=1, keepdims=True)), theano.config.floatX)
                 else:
                     alpha_sample = alpha
-            ctx_ = (context * alpha_sample[:,:,None]).sum(1) # current context
+            # ctx_ with size (batch, ctxdim)
+            ctx_ = (context * alpha_sample[:, :, None]).sum(1)  # current context
 
         if options['selector']:
-            sel_ = tensor.nnet.sigmoid(tensor.dot(h_, tparams[_p(prefix, 'W_sel')])+tparams[_p(prefix,'b_sel')])
+            # sel_ with size (batch, )
+            sel_ = tensor.nnet.sigmoid(tensor.dot(h_, tparams[_p(prefix, 'W_sel')]) + tparams[_p(prefix, 'b_sel')])
             sel_ = sel_.reshape([sel_.shape[0]])
-            ctx_ = sel_[:,None] * ctx_
+            #
+            ctx_ = sel_[:, None] * ctx_
 
         preact = tensor.dot(h_, tparams[_p(prefix, 'U')])
         preact += x_
@@ -442,15 +516,18 @@ def lstm_cond_layer(tparams, state_below, options, prefix='lstm',
         # compute the new memory/hidden state
         # if the mask is 0, just copy the previous state
         c = f * c_ + i * c
-        c = m_[:,None] * c + (1. - m_)[:,None] * c_ 
+        c = m_[:, None] * c + (1. - m_)[:, None] * c_
 
         h = o * tensor.tanh(c)
-        h = m_[:,None] * h + (1. - m_)[:,None] * h_
+        h = m_[:, None] * h + (1. - m_)[:, None] * h_
 
+        # alpha is the probability
+        # alpha_sample is the sampled result
+        # alpha_pre is alpha before softmax
         rval = [h, c, alpha, alpha_sample, ctx_]
         if options['selector']:
             rval += [sel_]
-        rval += [pstate_, pctx_, i, f, o, preact, alpha_pre]+pctx_list
+        rval += [pstate_, pctx_, i, f, o, preact, alpha_pre] + pctx_list
         return rval
 
     if options['use_dropout_lstm']:
@@ -824,6 +901,7 @@ def build_sampler(tparams, options, use_noise, trng, sampling=True):
     f_next = theano.function([x, ctx]+init_state+init_memory, [next_probs, next_sample]+next_state+next_memory, name='f_next', profile=False)
 
     return f_init, f_next
+
 
 # generate sample
 def gen_sample(tparams, f_init, f_next, ctx0, options,

@@ -458,8 +458,7 @@ def lstm_cond_layer(tparams, state_below, options, prefix='lstm',
         pctx_list = []
         pctx_list.append(pctx_)
         pctx_ = tanh(pctx_)
-        # alpha is a list containing one array
-        # the array is with size (batch, L)
+        # alpha is a array with size (batch, L)
         alpha = tensor.dot(pctx_, tparams[_p(prefix, 'U_att')]) + tparams[_p(prefix, 'c_tt')]
         alpha_pre = alpha
         alpha_shp = alpha.shape
@@ -492,7 +491,8 @@ def lstm_cond_layer(tparams, state_below, options, prefix='lstm',
             # sel_ with size (batch, )
             sel_ = tensor.nnet.sigmoid(tensor.dot(h_, tparams[_p(prefix, 'W_sel')]) + tparams[_p(prefix, 'b_sel')])
             sel_ = sel_.reshape([sel_.shape[0]])
-            #
+            # (batch, 1) * (batch, ctxdim)
+            # units in a vector have the same scale of surpression
             ctx_ = sel_[:, None] * ctx_
 
         preact = tensor.dot(h_, tparams[_p(prefix, 'U')])
@@ -540,14 +540,14 @@ def lstm_cond_layer(tparams, state_below, options, prefix='lstm',
         dp_shape = state_below.shape
         if one_step:
             dp_mask = tensor.switch(use_noise,
-                                    trng.binomial((dp_shape[0], 3*dim),
+                                    trng.binomial((dp_shape[0], 3 * dim),
                                                   p=0.5, n=1, dtype=state_below.dtype),
                                     tensor.alloc(0.5, dp_shape[0], 3 * dim))
         else:
             dp_mask = tensor.switch(use_noise,
-                                    trng.binomial((dp_shape[0], dp_shape[1], 3*dim),
+                                    trng.binomial((dp_shape[0], dp_shape[1], 3 * dim),
                                                   p=0.5, n=1, dtype=state_below.dtype),
-                                    tensor.alloc(0.5, dp_shape[0], dp_shape[1], 3*dim))
+                                    tensor.alloc(0.5, dp_shape[0], dp_shape[1], 3 * dim))
     else:
         if options['selector']:
             _step0 = lambda m_, x_, h_, c_, a_, as_, ct_, sel_, pctx_: _step(m_, x_, h_, c_, a_, as_, ct_, pctx_)
@@ -592,6 +592,7 @@ def lstm_cond_layer(tparams, state_below, options, prefix='lstm',
                                     n_steps=nsteps, profile=False)
         return rval, updates
 
+
 # parameter initialization
 # [roughly in the same order as presented in section 3.1.2]
 def init_params(options):
@@ -599,7 +600,7 @@ def init_params(options):
     # embedding: [matrix E in paper]
     params['Wemb'] = norm_weight(options['n_words'], options['dim_word'])
     ctx_dim = options['ctx_dim']
-    if options['lstm_encoder']: # potential feature that runs an LSTM over the annotation vectors
+    if options['lstm_encoder']:  # potential feature that runs an LSTM over the annotation vectors
         # encoder: LSTM
         params = get_layer('lstm')[0](options, params, prefix='encoder',
                                       nin=options['ctx_dim'], dim=options['dim'])
@@ -608,7 +609,7 @@ def init_params(options):
         ctx_dim = options['dim'] * 2
     # init_state, init_cell: [top right on page 4]
     for lidx in xrange(1, options['n_layers_init']):
-        params = get_layer('ff')[0](options, params, prefix='ff_init_%d'%lidx, nin=ctx_dim, nout=ctx_dim)
+        params = get_layer('ff')[0](options, params, prefix='ff_init_%d' % lidx, nin=ctx_dim, nout=ctx_dim)
     params = get_layer('ff')[0](options, params, prefix='ff_state', nin=ctx_dim, nout=options['dim'])
     params = get_layer('ff')[0](options, params, prefix='ff_memory', nin=ctx_dim, nout=options['dim'])
     # decoder: LSTM: [equation (1)/(2)/(3)]
@@ -675,10 +676,11 @@ def build_model(tparams, options, sampling=True):
     trng = RandomStreams(1234)
     use_noise = theano.shared(numpy.float32(0.))
 
-    # description string: #words x #samples,
+    # (words, samples) each column a sample
     x = tensor.matrix('x', dtype='int64')
     mask = tensor.matrix('mask', dtype='float32')
     # context: #samples x #annotations x dim
+    # context: (samples, L, D)
     ctx = tensor.tensor3('ctx', dtype='float32')
 
     n_timesteps = x.shape[0]
@@ -768,27 +770,35 @@ def build_model(tparams, options, sampling=True):
                 logit = dropout_layer(logit, use_noise, trng)
 
     # compute softmax
+    # logit with size (batch, steps, n_words)
     logit = get_layer('ff')[1](tparams, logit, options, prefix='ff_logit', activ='linear')
     logit_shp = logit.shape
-    probs = tensor.nnet.softmax(logit.reshape([logit_shp[0]*logit_shp[1], logit_shp[2]]))
+
+    # probs with size (batch x steps, n_words)
+    probs = tensor.nnet.softmax(logit.reshape([logit_shp[0] * logit_shp[1], logit_shp[2]]))
 
     # Index into the computed probability to give the log likelihood
+    # x_flat with size (batch x steps, )
     x_flat = x.flatten()
+    # p_flat with size (batch x steps x n_words, )
     p_flat = probs.flatten()
-    cost = -tensor.log(p_flat[tensor.arange(x_flat.shape[0])*probs.shape[1]+x_flat]+1e-8)
+    cost = -tensor.log(p_flat[tensor.arange(x_flat.shape[0]) * probs.shape[1] + x_flat] + 1e-8)
+    # Now, with shape (steps, batch)
     cost = cost.reshape([x.shape[0], x.shape[1]])
     masked_cost = cost * mask
-    cost = (masked_cost).sum(0)
+    # Here, cost with size (batch, )
+    cost = masked_cost.sum(0)
 
     # optional outputs
     opt_outs = dict() 
     if options['selector']:
         opt_outs['selector'] = sels
     if options['attn_type'] == 'stochastic':
-        opt_outs['masked_cost'] = masked_cost # need this for reinforce later
-        opt_outs['attn_updates'] = attn_updates # this is to update the rng
+        opt_outs['masked_cost'] = masked_cost  # need this for reinforce later
+        opt_outs['attn_updates'] = attn_updates  # this is to update the rng
 
     return trng, use_noise, [x, mask, ctx], alphas, alpha_sample, cost, opt_outs
+
 
 # build a sampler
 def build_sampler(tparams, options, use_noise, trng, sampling=True):
@@ -806,6 +816,7 @@ def build_sampler(tparams, options, use_noise, trng, sampling=True):
         step through the lstm (used for beam search)
     """
     # context: #annotations x dim
+    # (L, ctx_dim)
     ctx = tensor.matrix('ctx_sampler', dtype='float32')
     if options['lstm_encoder']:
         # encoder
@@ -816,10 +827,11 @@ def build_sampler(tparams, options, use_noise, trng, sampling=True):
         ctx = tensor.concatenate((ctx_fwd, ctx_rev), axis=1)
 
     # initial state/cell
+    # ctx_mean with size (ctx_dim, )
     ctx_mean = ctx.mean(0)
     for lidx in xrange(1, options['n_layers_init']):
         ctx_mean = get_layer('ff')[1](tparams, ctx_mean, options,
-                                      prefix='ff_init_%d'%lidx, activ='rectifier')
+                                      prefix='ff_init_%d' % lidx, activ='rectifier')
         if options['use_dropout']:
             ctx_mean = dropout_layer(ctx_mean, use_noise, trng)
     init_state = [get_layer('ff')[1](tparams, ctx_mean, options, prefix='ff_state', activ='tanh')]
@@ -830,10 +842,13 @@ def build_sampler(tparams, options, use_noise, trng, sampling=True):
             init_memory.append(get_layer('ff')[1](tparams, ctx_mean, options, prefix='ff_memory_%d'%lidx, activ='tanh'))
 
     print 'Building f_init...',
-    f_init = theano.function([ctx], [ctx]+init_state+init_memory, name='f_init', profile=False)
+    f_init = theano.function([ctx], [ctx] + init_state + init_memory, name='f_init', profile=False)
     print 'Done'
 
     # build f_next
+    # x with size (batch, )
+    # Which means we generate a batch
+    # of sentences for the same image
     ctx = tensor.matrix('ctx_sampler', dtype='float32')
     x = tensor.vector('x_sampler', dtype='int64')
     init_state = [tensor.matrix('init_state', dtype='float32')]
@@ -844,7 +859,7 @@ def build_sampler(tparams, options, use_noise, trng, sampling=True):
             init_memory.append(tensor.matrix('init_memory', dtype='float32'))
 
     # for the first word (which is coded with -1), emb should be all zero
-    emb = tensor.switch(x[:,None] < 0, tensor.alloc(0., 1, tparams['Wemb'].shape[1]),
+    emb = tensor.switch(x[:, None] < 0, tensor.alloc(0., 1, tparams['Wemb'].shape[1]),
                         tparams['Wemb'][x])
 
     proj = get_layer('lstm_cond')[1](tparams, emb, options,
@@ -894,6 +909,8 @@ def build_sampler(tparams, options, use_noise, trng, sampling=True):
                 logit = dropout_layer(logit, use_noise, trng)
     logit = get_layer('ff')[1](tparams, logit, options, prefix='ff_logit', activ='linear')
     logit_shp = logit.shape
+
+    # next_probs with size (batch, L)
     next_probs = tensor.nnet.softmax(logit)
     next_sample = trng.multinomial(pvals=next_probs).argmax(1)
 
@@ -1115,6 +1132,7 @@ def pred_probs(f_log_probs, options, worddict, prepare_data, data, iterator, ver
             print '%d/%d samples computed'%(n_done,n_samples)
 
     return probs
+
 
 def validate_options(options):
     # Put friendly reminders here
@@ -1346,7 +1364,7 @@ def train(dim_word=100,  # word vector dimensionality
             ud_start = time.time()
             cost = f_grad_shared(x, mask, ctx)
             f_update(lrate)
-            ud_duration = time.time() - ud_start # some monitoring for each mini-batch
+            ud_duration = time.time() - ud_start  # some monitoring for each mini-batch
 
             # Numerical stability check
             if numpy.isnan(cost) or numpy.isinf(cost):

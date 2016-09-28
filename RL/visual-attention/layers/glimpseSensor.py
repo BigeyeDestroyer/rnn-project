@@ -55,14 +55,14 @@ class glimpseSensor(object):
 
         # img with size (batch, channels, height, width)
         img = T.reshape(img_batch, (batch_size, channels, mnist_size, mnist_size))
-        self.img = img  # with size (batch, h, w, 1)
+        self.img = img  # with size (batch, 1, h, w)
 
         zooms = []  # zooms of all the images in batch
 
         maxRadius = minRadius * (2 ** (depth - 1))  # radius of the largest zoom
         offset = maxRadius
 
-        # zero-padding the batch to (batch, h + 2R, w + 2R, channels)
+        # zero-padding the batch to (batch, channels, h + 2R, w + 2R)
         img = T.concatenate((T.zeros((batch_size, channels, maxRadius, mnist_size)), img), axis=2)
         img = T.concatenate((img, T.zeros((batch_size, channels, maxRadius, mnist_size))), axis=2)
         img = T.concatenate((T.zeros((batch_size, channels, mnist_size + 2 * maxRadius, maxRadius)), img), axis=3)
@@ -89,6 +89,7 @@ class glimpseSensor(object):
                 # Get a zoom patch with size (d_raw, d_raw) from one_image
                 # zoom = one_img[adjusted_loc[0]: (adjusted_loc[0] + d_raw),
                 #        adjusted_loc[1]: (adjusted_loc[1] + d_raw)]
+                # zoom with size (channels, 2 * r, 2 * r)
                 zoom = one_img[:, adjusted_loc[0]: (adjusted_loc[0] + d_raw),
                        adjusted_loc[1]: (adjusted_loc[1] + d_raw)]
 

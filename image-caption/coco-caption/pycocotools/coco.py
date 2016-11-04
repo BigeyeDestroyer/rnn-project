@@ -52,6 +52,7 @@ import numpy as np
 from skimage.draw import polygon
 import copy
 
+
 class COCO:
     def __init__(self, annotation_file=None):
         """

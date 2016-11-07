@@ -59,13 +59,6 @@ for nreq = 0: (10 * lambdaRequests) % <- a value where the probability of reques
     end
 end
 
-if(PLOT_FIGS) 
-    figure; 
-    imagesc(0: max_n_cars, nCM, P); colorbar; 
-    xlabel('num at the end of the day'); 
-    ylabel('num in morning'); 
-    axis xy; drawnow; 
-end
 
 
 

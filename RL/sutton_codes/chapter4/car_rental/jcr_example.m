@@ -33,7 +33,7 @@ end
 V = zeros(max_n_cars + 1, max_n_cars + 1); 
 
 % initial policy: 
-pol_pi = zeros(max_n_cars + 1,max_n_cars + 1); 
+pol_pi = zeros(max_n_cars + 1, max_n_cars + 1); 
 
 policyStable = 0; iterNum = 0; 
 while( ~policyStable )

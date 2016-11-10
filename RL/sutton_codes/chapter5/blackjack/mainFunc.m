@@ -10,8 +10,8 @@ clc;
 N_HANDS_TO_PLAY=5e6;
 
 % nStates comprises 3 parts:
-% player's hand: 12 - 21
-% dealer's hand: ace - 13 (dealer only shows one card)
+% player's hand: 12 ~ 21
+% dealer's hand: ace ~ 13 (dealer only shows one card)
 nStates = prod([21 - 12 + 1, 13, 2]);
 allStatesRewSum = zeros(nStates, 1);
 allStatesNVisits = zeros(nStates, 1); 

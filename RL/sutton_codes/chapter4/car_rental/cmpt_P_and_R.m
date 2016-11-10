@@ -1,5 +1,8 @@
 function [R, P] = cmpt_P_and_R(lambdaRequests, lambdaReturns, max_n_cars, max_num_cars_can_transfer)
 % This function computes the rewards and transition probabilities
+% 'P' and 'R' corresponds to P_{ss'}^{a} and R_{ss'}^{a}
+% which are most important for MDP, this also leads to 
+% difficulties in actual application scenario.
 %
 % Inputs
 %     lambdaRequests            : lambda for rental possion 

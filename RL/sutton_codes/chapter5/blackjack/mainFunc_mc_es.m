@@ -95,7 +95,7 @@ for hi = 1: N_HANDS_TO_PLAY
     
     % accumulate these values used in computing statistics on this action value function Q^{\pi}: 
     for si = 1: size(stateseen, 1)
-        if( (stateseen(si,1)>=12) && (stateseen(si,1)<=21) ) % we don't count "initial" and terminal states
+        if((stateseen(si,1) >= 12) && (stateseen(si,1) <= 21)) % we don't count "initial" and terminal states
             staInd = sub2ind([21 - 12 + 1, 13, 2], stateseen(si, 1) - 12 + 1, ...
                 stateseen(si, 2), stateseen(si, 3) + 1); 
             actInd = pol_pi(staInd) + 1; 

@@ -12,8 +12,9 @@ rng_seed = rng; % record the current random seed
                 % a new seed as: rng(rng_seed); 
 
 % nStates comprises 3 parts:
-% player's hand : 12 ~ 21
-% dealer's hand : ace ~ 13 (dealer only shows one card)
+% 1. player's hand : 12 ~ 21
+% 2. dealer's hand : ace ~ 13 (dealer only shows one card)
+% 3. player having 'ace' or not
 nStates = prod([21 - 12 + 1, 13, 2]);
 nActions = 2; % 0 => stick; 1 => hit 
 Q = zeros(nStates, nActions);  % the initial action-value function
